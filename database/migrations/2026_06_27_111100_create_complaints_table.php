@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //الشكاوي
-        Schema::create('reports', function (Blueprint $table) {
-            $table->id();
+        Schema::create('complaints', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('store_id')->constrained('stores')->cascadeOnDelete();
             $table->enum('report_type', ['wrong_price', 'bad_treatment', 'other']);//'سعر_خاطئ'، 'معاملة_سيئة'، 'أخرى'
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reports');
+        Schema::dropIfExists('complaints');
     }
 };

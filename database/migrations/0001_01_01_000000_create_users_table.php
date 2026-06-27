@@ -23,7 +23,6 @@ return new class extends Migration
             $table->timestamps();
             $table->enum('role', ['admin', 'client'])->default('client');
 
-
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
