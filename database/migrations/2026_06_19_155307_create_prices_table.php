@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //الاسعار
+        // الاسعار
         Schema::create('prices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('store_id')->constrained('stores')->cascadeOnDelete();

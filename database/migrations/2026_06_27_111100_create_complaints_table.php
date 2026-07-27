@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('complaints', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('store_id')->constrained('stores')->cascadeOnDelete();
-            $table->enum('report_type', ['wrong_price', 'bad_treatment', 'other']);//'سعر_خاطئ'، 'معاملة_سيئة'، 'أخرى'
+            $table->enum('report_type', ['wrong_price', 'bad_treatment', 'other']); // 'سعر_خاطئ'، 'معاملة_سيئة'، 'أخرى'
             $table->text('details');
-            $table->enum('status', ['pending', 'resolved', 'rejected'])->default('pending');//'معلق'، 'تم حله'، 'مرفوض'
+            $table->enum('status', ['pending', 'resolved', 'rejected'])->default('pending'); // 'معلق'، 'تم حله'، 'مرفوض'
             $table->timestamps();
         });
     }

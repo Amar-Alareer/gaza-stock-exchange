@@ -11,8 +11,6 @@ class Complaints extends Model
         'details',
         'status',
         'user_id',
-        'store_id'
+        'store_id',
     ];
-
-   
 }
