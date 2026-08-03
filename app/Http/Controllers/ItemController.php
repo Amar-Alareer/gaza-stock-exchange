@@ -7,26 +7,30 @@ use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
-    // 1. عرض الجميع (مع البحث والفلترة)
+    // 1. عرض الجميع مع البحث والفلترة
     public function index(Request $request)
     {
         $query = Item::query();
 
-        if ($request->search) {
+        if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->category) {
+        if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
 
-
-        return $query->get();
+        return response()->json($query->get(), 200);
     }
 
-
+    // 2. إضافة صنف جديد
     public function store(Request $request)
     {
+        $request->validate([
+            'name'     => 'required|string',
+            'category' => 'required|string',
+        ]);
+
         $item = Item::create([
             'name'     => $request->name,
             'category' => $request->category,
@@ -35,35 +39,31 @@ class ItemController extends Controller
         return response()->json($item, 201);
     }
 
-
-
+    // 3. تعديل صنف
     public function update(Request $request, $id)
     {
-        $item = Item::find($id);
+        $item = Item::findOrFail($id);
 
-        if (!$item) {
-            return response()->json(['message' => 'الصنف غير موجود'], 404);
-        }
+        $request->validate([
+            'name'     => 'required|string',
+            'category' => 'required|string',
+        ]);
 
         $item->update([
             'name'     => $request->name,
             'category' => $request->category,
         ]);
 
-        return response()->json($item);
+        return response()->json($item, 200);
     }
 
-
+    // 4. حذف صنف
     public function destroy($id)
     {
-        $item = Item::find($id);
-
-        if (!$item) {
-            return response()->json(['message' => 'الصنف غير موجود'], 404);
-        }
+        $item = Item::findOrFail($id);
 
         $item->delete();
 
-        return response()->json(['message' => 'تم الحذف بنجاح']);
+        return response()->json(['message' => 'تم الحذف بنجاح'], 200);
     }
 }

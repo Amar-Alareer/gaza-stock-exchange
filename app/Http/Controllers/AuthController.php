@@ -9,36 +9,55 @@ use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
+    public function register(Request $request){
+        $request->validate([
+            'name'=>'required|string|max:255',
+            'email'=>'required|string|email|unique:users,email',
+            'password'=>'required|string|min:9|confirmed',
+            'region_id' => 'nullable|exists:regions,id',
+
+        ]);
+        $user= User::create([
+          'name'=>$request->name,
+          'email'=>$request->email,
+          'password'=>Hash::make($request->password),
+        'region_id' => $request->region_id ?? null
+
+        ]);
+        return response()->json([
+            'message'=>'تم تسجيل مستخدم جديد ',
+            'user'=>$user
+        ], 201);
+    }
+
     public function login(Request $request)
     {
         // 1. التحقق من المدخلات
         $request->validate([
             'username' => 'required|string',
-            'password' => 'required',
+            'password' => 'required|string',
         ]);
 
-        // 2. البحث عن المستخدم
-        $user = User::where('email', $request->username)
-            ->orWhere('username', $request->username)
-            ->orWhere('name', $request->username)
-            ->first();
+        $user = User::where(function ($query) use ($request) {
+            $query->where('email', $request->username)
+                  ->orWhere('username', $request->username)
+                  ->orWhere('name', $request->username);
+        })->first();
 
-        // 3. التحقق من كلمة المرور
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'البيانات المدخلة غير صحيحة.',
             ], 401);
         }
 
-        // 4. إنشاء التوكن (Token) وإرجاعه للوحة Vue
         $token = $user->createToken('admin-token')->plainTextToken;
 
         return response()->json([
-            'token' => $token,
-            'user' => [
-                'name' => $user->name,
+            'token'   => $token,
+            'user'    => [
+                'name'  => $user->name,
                 'email' => $user->email,
-                'role' => 'admin', // اللوحة تتوقع رول للآدمن لتوجيهه للـ Dashboard
+                'role'  => 'admin',
             ],
             'message' => 'تم تسجيل الدخول بنجاح',
         ], 200);
@@ -46,12 +65,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // حذف التوكن الحالي عند تسجيل الخروج
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'تم تسجيل الخروج بنجاح',
-        ]);
+        ], 200);
     }
 
     public function getProfile(Request $request)

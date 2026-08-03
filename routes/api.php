@@ -9,14 +9,24 @@ use App\Http\Controllers\ItemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+
 Route::get('/articles', [ArticleController::class, 'index']);
 Route::get('/articles/{id}', [ArticleController::class, 'show']);
 
 
+
+
+
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::apiResource('items',ItemController::class);
+
+    Route::get('admin/items', [ItemController::class, 'index']);
+    Route::post('admin/items', [ItemController::class, 'store']);
+    Route::put('admin/items/{id}', [ItemController::class, 'update']);
+    Route::delete('admin/items/{id}', [ItemController::class, 'destroy']);
+
 
     Route::get('/admin/dashboard-data', [DashboardController::class, 'getDashboardData']);
     Route::put('/admin/products/{id}', [DashboardController::class, 'updateProduct']);
