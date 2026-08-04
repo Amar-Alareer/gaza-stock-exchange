@@ -1,0 +1,15 @@
+body{
+  font-family: Arial;
+  text-align:center;
+}
+
+nav{
+  background:black;
+  color:white;
+  padding:15px;
+}
+
+footer{
+  background:#ddd;
+  padding:10px;
+}
