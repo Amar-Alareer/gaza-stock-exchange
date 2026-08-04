@@ -87,6 +87,12 @@ class DashboardController extends Controller
 
         if ($priceRecord->item) {
             $priceRecord->item->name = $request->item_name;
+            if ($request->filled('category')) {
+                $priceRecord->item->category = $request->category;
+            }
+            if ($request->has('image_url')) {
+                $priceRecord->item->image_url = $request->image_url;
+            }
             $priceRecord->item->save();
         }
 
@@ -95,6 +101,7 @@ class DashboardController extends Controller
             'message' => 'تم تحديث المنتج والسعر بنجاح',
         ], 200);
     }
+
 
     public function deleteProduct($id)
     {

@@ -10,7 +10,9 @@ class ItemController extends Controller
     // 1. عرض الجميع مع البحث والفلترة
     public function index(Request $request)
     {
-        $query = Item::query();
+        $query = Item::with(['prices.store'])
+            ->withCount('prices')
+            ->withMin('prices', 'price');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -32,8 +34,10 @@ class ItemController extends Controller
         ]);
 
         $item = Item::create([
-            'name'     => $request->name,
-            'category' => $request->category,
+            'name'      => $request->name,
+            'category'  => $request->category,
+            'image_url' => $request->image_url,
+            'min_price' => $request->min_price,
         ]);
 
         return response()->json($item, 201);
@@ -50,8 +54,10 @@ class ItemController extends Controller
         ]);
 
         $item->update([
-            'name'     => $request->name,
-            'category' => $request->category,
+            'name'      => $request->name,
+            'category'  => $request->category,
+            'image_url' => $request->image_url,
+            'min_price' => $request->min_price,
         ]);
 
         return response()->json($item, 200);
@@ -65,5 +71,18 @@ class ItemController extends Controller
         $item->delete();
 
         return response()->json(['message' => 'تم الحذف بنجاح'], 200);
+    }
+
+    // 5. حذف عدة أصناف
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'integer|exists:items,id',
+        ]);
+
+        Item::whereIn('id', $request->ids)->delete();
+
+        return response()->json(['message' => 'تم حذف الأصناف بنجاح'], 200);
     }
 }

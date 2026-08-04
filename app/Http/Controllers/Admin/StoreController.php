@@ -201,9 +201,11 @@ class StoreController extends Controller
                 'name' => $price->item->name ?? 'غير معروف',
                 'category' => $price->item->category ?? 'غير محدد',
                 'price' => $price->price,
+                'image_url' => $price->item->image_url ?? null,
                 'updated_at' => $price->updated_at?->diffForHumans() ?? 'غير معروف',
             ];
         });
+
 
         $regions = Region::orderBy('area_name')->get(['id', 'city_or_governorate', 'area_name']);
 
@@ -239,6 +241,82 @@ class StoreController extends Controller
             'status' => 'success',
             'message' => 'تم حذف المتجر بنجاح',
         ]);
+    }
+
+    /**
+     * إضافة منتج جديد أو ربطه بالمتجر مع تحديد السعر
+     */
+    public function addProduct(Request $request, $id)
+    {
+        $store = Store::find($id);
+        if (!$store) {
+            return response()->json(['status' => 'error', 'message' => 'المتجر غير موجود'], 404);
+        }
+
+        $request->validate([
+            'name' => 'required|string|min:2',
+            'category' => 'required|string',
+            'price' => 'nullable|numeric|min:0',
+            'image_url' => 'nullable|string',
+        ], [
+            'name.required' => 'اسم الصنف مطلوب',
+            'name.min' => 'اسم الصنف يجب أن يكون حرفين على الأقل',
+            'category.required' => 'فئة الصنف مطلوبة',
+        ]);
+
+        // 1. البحث عن المنتج أو إنشائه
+        $item = Item::firstOrCreate(
+            ['name' => trim($request->name)],
+            [
+                'category' => trim($request->category),
+                'image_url' => $request->image_url ? trim($request->image_url) : null,
+                'min_price' => $request->price ? floatval($request->price) : null,
+            ]
+        );
+
+        // تحديث بيانات المنتج إذا كانت الفئة أو الصورة قد أضيفت
+        $updated = false;
+        if ($request->category && $item->category !== trim($request->category)) {
+            $item->category = trim($request->category);
+            $updated = true;
+        }
+        if ($request->image_url && $item->image_url !== trim($request->image_url)) {
+            $item->image_url = trim($request->image_url);
+            $updated = true;
+        }
+        if ($request->price && (!$item->min_price || floatval($request->price) < $item->min_price)) {
+            $item->min_price = floatval($request->price);
+            $updated = true;
+        }
+        if ($updated) {
+            $item->save();
+        }
+
+        // 2. تحديث أو إنشاء سعر هذا المنتج في المتجر
+        $price = Price::updateOrCreate(
+            [
+                'store_id' => $store->id,
+                'item_id' => $item->id,
+            ],
+            [
+                'price' => $request->price ? floatval($request->price) : 0,
+                'source' => $store->name,
+            ]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تم إضافة المنتج للمتجر بنجاح',
+            'product' => [
+                'id' => $price->id,
+                'item_id' => $item->id,
+                'name' => $item->name,
+                'category' => $item->category,
+                'price' => $price->price,
+                'image_url' => $item->image_url,
+                'updated_at' => $price->updated_at?->diffForHumans() ?? 'الآن',
+            ],
+        ], 201);
     }
 
     /**
@@ -286,3 +364,4 @@ class StoreController extends Controller
         ];
     }
 }
+

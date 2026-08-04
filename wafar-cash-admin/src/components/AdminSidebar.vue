@@ -25,12 +25,16 @@
                 <span>الرئيسية</span>
             </router-link>
 
-            <a href="#" @click.prevent class="sidebar__item">
+            <router-link
+                to="/items"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
                 <span class="sidebar__icon">
                     <PackageIcon :size="18" />
                 </span>
                 <span>المنتجات</span>
-            </a>
+            </router-link>
 
             <router-link
                 to="/stores"
@@ -41,6 +45,17 @@
                     <StoreIcon :size="18" />
                 </span>
                 <span>المتاجر</span>
+            </router-link>
+
+            <router-link
+                to="/categories"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
+                <span class="sidebar__icon">
+                    <GridIcon :size="18" />
+                </span>
+                <span>التصنيفات</span>
             </router-link>
 
             <a href="#" @click.prevent class="sidebar__item">
@@ -96,6 +111,7 @@ import {
     Home as HomeIcon,
     Package as PackageIcon,
     Store as StoreIcon,
+    LayoutGrid as GridIcon,
     BarChart2 as BarChart2Icon,
     FileText as FileTextIcon,
     Users as UsersIcon,
@@ -110,6 +126,7 @@ export default {
         HomeIcon,
         PackageIcon,
         StoreIcon,
+        GridIcon,
         BarChart2Icon,
         FileTextIcon,
         UsersIcon,

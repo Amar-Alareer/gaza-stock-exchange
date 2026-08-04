@@ -9,6 +9,8 @@ class Item extends Model
     protected $fillable = [
         'name',
         'category',
+        'image_url',
+        'min_price',
     ];
 
     public function prices()

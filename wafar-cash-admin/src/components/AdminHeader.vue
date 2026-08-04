@@ -498,10 +498,10 @@ export default {
         // جلب الإشعارات فور تحميل الهيدر
         this.fetchNotifications();
 
-        // التحديث التلقائي للإشعارات كل 20 ثانية
+        // التحديث التلقائي للإشعارات كل 10 ثوانٍ (تحديث سريع وتفاعلي)
         this.pollingTimer = setInterval(() => {
             this.fetchNotifications();
-        }, 20000);
+        }, 10000);
 
         // جلب بيانات المستخدم الأولية إذا لم تكن موجودة
         if (!globalState.currentUser) {
