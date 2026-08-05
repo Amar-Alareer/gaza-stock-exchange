@@ -8,7 +8,7 @@ class Item extends Model
 {
     protected $fillable = [
         'name',
-        'category_id',
+        'category',
     ];
 
     public function prices()
@@ -16,17 +16,9 @@ class Item extends Model
         return $this->hasMany(Price::class);
     }
 
-    /**
-     * أرخص سعر مسجل لهيك الصنف (مع اسم المحل) - تُستخدم بالصفحة الرئيسية وصفحة الأسعار
-     */
-    public function cheapestPrice()
+    public function item()
     {
-        return $this->hasOne(Price::class)->ofMany('price', 'min')->with('store:id,name');
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Item::class);
     }
 
     public function store()

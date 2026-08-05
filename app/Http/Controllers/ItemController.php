@@ -7,117 +7,63 @@ use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
-    // 1. عرض الجميع (مع البحث والفلترة حسب الكاتيجوري + أرخص سعر)
+    // 1. عرض الجميع مع البحث والفلترة
     public function index(Request $request)
     {
-        $query = Item::with(['category', 'cheapestPrice.store']);
+        $query = Item::query();
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // فلترة حسب category_id (الطريقة الجديدة)
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        // توافق مع الاستدعاء القديم لو حدا لسا عم يبعت اسم الكاتيجوري
         if ($request->filled('category')) {
-            $query->whereHas('category', function ($q) use ($request) {
-                $q->where('name', $request->category);
-            });
+            $query->where('category', $request->category);
         }
 
-        if ($request->filled('sort') && $request->sort === 'latest') {
-            $query->latest();
-        }
-
-        if ($request->filled('limit')) {
-            $query->limit((int) $request->limit);
-        }
-
-        return $query->get();
+        return response()->json($query->get(), 200);
     }
 
-    public function show($id)
-    {
-        $item = Item::with(['category', 'prices.store'])->find($id);
-
-        if (! $item) {
-            return response()->json(['message' => 'الصنف غير موجود'], 404);
-        }
-
-        return $item;
-    }
-
-    /**
-     * مقارنة أسعار صنف معين بين كل المحلات (مرتبة من الأرخص للأغلى)
-     */
-    public function prices($id)
-    {
-        $item = Item::find($id);
-
-        if (! $item) {
-            return response()->json(['message' => 'الصنف غير موجود'], 404);
-        }
-
-        $prices = $item->prices()
-            ->with('store:id,name,governorate,sub_area,image')
-            ->orderBy('price')
-            ->get();
-
-        return response()->json([
-            'item' => $item->only('id', 'name'),
-            'prices' => $prices,
-        ]);
-    }
-
+    // 2. إضافة صنف جديد
     public function store(Request $request)
     {
         $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'nullable|exists:categories,id',
+            'name'     => 'required|string',
+            'category' => 'required|string',
         ]);
 
         $item = Item::create([
-            'name'        => $request->name,
-            'category_id' => $request->category_id,
+            'name'     => $request->name,
+            'category' => $request->category,
         ]);
 
-        return response()->json($item->load('category'), 201);
+        return response()->json($item, 201);
     }
 
+    // 3. تعديل صنف
     public function update(Request $request, $id)
     {
-        $item = Item::find($id);
-
-        if (! $item) {
-            return response()->json(['message' => 'الصنف غير موجود'], 404);
-        }
+        $item = Item::findOrFail($id);
 
         $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'nullable|exists:categories,id',
+            'name'     => 'required|string',
+            'category' => 'required|string',
         ]);
 
         $item->update([
-            'name'        => $request->name,
-            'category_id' => $request->category_id,
+            'name'     => $request->name,
+            'category' => $request->category,
         ]);
 
-        return response()->json($item->load('category'));
+        return response()->json($item, 200);
     }
 
+    // 4. حذف صنف
     public function destroy($id)
     {
-        $item = Item::find($id);
-
-        if (! $item) {
-            return response()->json(['message' => 'الصنف غير موجود'], 404);
-        }
+        $item = Item::findOrFail($id);
 
         $item->delete();
 
-        return response()->json(['message' => 'تم الحذف بنجاح']);
+        return response()->json(['message' => 'تم الحذف بنجاح'], 200);
     }
 }
