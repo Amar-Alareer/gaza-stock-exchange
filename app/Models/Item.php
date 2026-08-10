@@ -9,6 +9,7 @@ class Item extends Model
     protected $fillable = [
         'name',
         'category',
+        'category_id'
     ];
 
     public function prices()
@@ -24,5 +25,10 @@ class Item extends Model
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(category::class);
     }
 }
