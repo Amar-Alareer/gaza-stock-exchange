@@ -3,23 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
- protected $fillable=[
-'name',
-'slug',
-'description',
-'image',
-'is_active',
-'sort_order',
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'image',
+        'is_active',
+        'sort_order',
+    ];
 
- ];
-
- public function items(): HasMany
+    public function items(): HasMany
     {
-        return $this->hasMany(item::class);
+        return $this->hasMany(Item::class);
     }
-
-
 }

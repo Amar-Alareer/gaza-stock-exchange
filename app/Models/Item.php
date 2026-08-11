@@ -19,18 +19,8 @@ class Item extends Model
         return $this->hasMany(Price::class);
     }
 
-    public function item()
+    public function categoryRelation()
     {
-        return $this->belongsTo(Item::class);
-    }
-
-    public function store()
-    {
-        return $this->belongsTo(Store::class);
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

@@ -49,7 +49,7 @@
 
                         <select v-model="selectedCategory" class="items-filter-select" id="items-category-filter">
                             <option value="">كل الفئات</option>
-                            <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
+                            <option v-for="cat in categoryOptions" :key="cat.id || cat.name" :value="cat.name">{{ cat.name }}</option>
                         </select>
 
                         <select v-model="sortBy" class="items-filter-select" id="items-sort-select">
@@ -176,10 +176,10 @@
                                     <!-- الفئة -->
                                     <td>
                                         <span
-                                            v-if="item.category"
+                                            v-if="item.category_name || item.category"
                                             class="category-badge"
-                                            :style="getCategoryBadgeStyle(item.category)"
-                                        >{{ item.category }}</span>
+                                            :style="getCategoryBadgeStyle(item.category_name || item.category)"
+                                        >{{ item.category_name || item.category }}</span>
                                         <span v-else class="category-badge category-badge--empty">غير محدد</span>
                                     </td>
 
@@ -290,10 +290,10 @@
                                         v-model="selectedItemIds"
                                     />
                                     <span
-                                        v-if="item.category"
+                                        v-if="item.category_name || item.category"
                                         class="category-badge"
-                                        :style="getCategoryBadgeStyle(item.category)"
-                                    >{{ item.category }}</span>
+                                        :style="getCategoryBadgeStyle(item.category_name || item.category)"
+                                    >{{ item.category_name || item.category }}</span>
                                     <span v-else class="category-badge category-badge--empty">غير محدد</span>
                                 </div>
 
@@ -452,8 +452,8 @@
                             <!-- التصنيف -->
                             <div class="qv-meta-item">
                                 <span class="qv-meta-label">التصنيف</span>
-                                <span class="category-badge" :style="getCategoryBadgeStyle(activeStoresItem?.category)">
-                                    {{ activeStoresItem?.category || '—' }}
+                                <span class="category-badge" :style="getCategoryBadgeStyle(activeStoresItem?.category_name || activeStoresItem?.category)">
+                                    {{ activeStoresItem?.category_name || activeStoresItem?.category || '—' }}
                                 </span>
                             </div>
 
@@ -674,15 +674,15 @@
                             فئة الصنف <span class="required-star">*</span>
                         </label>
                         <select
-                            v-model="form.category"
+                            v-model="form.category_id"
                             id="item-category"
                             class="form-input form-select"
-                            :class="{ 'form-input--error': formErrors.category }"
+                            :class="{ 'form-input--error': formErrors.category_id }"
                         >
-                            <option value="" disabled>اختر فئة المنتج...</option>
-                            <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
+                            <option :value="null" disabled>اختر فئة المنتج...</option>
+                            <option v-for="cat in categoryOptions" :key="cat.id || cat.name" :value="cat.id">{{ cat.name }}</option>
                         </select>
-                        <span v-if="formErrors.category" class="field-error">{{ formErrors.category }}</span>
+                        <span v-if="formErrors.category_id" class="field-error">{{ formErrors.category_id }}</span>
                     </div>
 
                     <!-- 4. السعر الإرشادي بالشيكل -->
@@ -818,7 +818,7 @@ import {
     Upload as UploadIcon,
 } from "@lucide/vue";
 
-// ——— قائمة الفئات المعرفة في النظام ———
+// ——— قائمة الفئات المعرفة في النظام (احتياطية) ———
 const DEFAULT_CATEGORIES = [
     "خضروات",
     "فواكه",
@@ -905,6 +905,7 @@ export default {
     data() {
         return {
             items: [],
+            categories: [],           // التصنيفات من الـ API
             searchQuery: "",
             selectedCategory: "",
             sortBy: "latest",
@@ -934,27 +935,35 @@ export default {
             currentItemId: null,
             form: {
                 name: "",
-                category: "",
+                category_id: null,
                 min_price: "",
                 image_url: "",
             },
             formErrors: {
                 name: "",
-                category: "",
+                category_id: "",
             },
 
             showDeleteConfirm: false,
             itemToDelete: null,
-            categoryOptions: DEFAULT_CATEGORIES,
         };
     },
 
     computed: {
+        // التصنيفات للفلتر والفورم (من API أو احتياطية)
+        categoryOptions() {
+            if (this.categories.length > 0) return this.categories;
+            return DEFAULT_CATEGORIES.map((name, i) => ({ id: null, name }));
+        },
+
         filteredItems() {
             let list = [...this.items];
 
             if (this.selectedCategory) {
-                list = list.filter((i) => i.category === this.selectedCategory);
+                list = list.filter((i) => {
+                    const catName = i.category_name || i.category_relation?.name || i.category;
+                    return catName === this.selectedCategory;
+                });
             }
 
             if (this.searchQuery.trim()) {
@@ -962,7 +971,7 @@ export default {
                 list = list.filter(
                     (i) =>
                         i.name?.toLowerCase().includes(q) ||
-                        i.category?.toLowerCase().includes(q),
+                        (i.category_name || i.category)?.toLowerCase().includes(q),
                 );
             }
 
@@ -992,11 +1001,6 @@ export default {
             return pages;
         },
 
-        uniqueCategories() {
-            const set = new Set([...DEFAULT_CATEGORIES, ...this.items.map((i) => i.category).filter(Boolean)]);
-            return Array.from(set).sort();
-        },
-
         isAllPaginatedSelected() {
             if (this.paginatedItems.length === 0) return false;
             return this.paginatedItems.every((item) => this.selectedItemIds.includes(item.id));
@@ -1012,6 +1016,7 @@ export default {
 
     mounted() {
         this.fetchItems();
+        this.fetchCategories();
         window.addEventListener("keydown", this.handleKeyDown);
     },
 
@@ -1051,16 +1056,30 @@ export default {
             }
         },
 
+        async fetchCategories() {
+            try {
+                const res = await apiClient.get("/categories");
+                const raw = Array.isArray(res.data) ? res.data : res.data.data || [];
+                this.categories = raw.filter(c => c.is_active !== false);
+            } catch (e) {
+                // استخدام القائمة الاحتياطية عند فشل الجلب
+                console.warn("لم يتم جلب التصنيفات من الـ API", e);
+            }
+        },
+
         async saveItem() {
             if (!this.validateForm()) return;
             this.isSaving = true;
             this.saveError = "";
             try {
+                // إيجاد اسم التصنيف من الـ ID المختار
+                const selectedCat = this.categories.find(c => c.id === this.form.category_id);
                 const payload = {
-                    name: this.form.name.trim(),
-                    category: this.form.category.trim(),
-                    min_price: this.form.min_price ? parseFloat(this.form.min_price) : null,
-                    image_url: this.form.image_url ? this.form.image_url.trim() : null,
+                    name:        this.form.name.trim(),
+                    category_id: this.form.category_id || null,
+                    category:    selectedCat?.name || null,
+                    min_price:   this.form.min_price ? parseFloat(this.form.min_price) : null,
+                    image_url:   this.form.image_url ? this.form.image_url.trim() : null,
                 };
                 if (this.modalMode === "edit") {
                     await apiClient.put(`/admin/items/${this.currentItemId}`, payload);
@@ -1069,7 +1088,8 @@ export default {
                 }
                 this.closeModal();
                 await this.fetchItems();
-                globalState.triggerNotificationRefresh(); // تحديث شارة الإشعارات
+                await this.fetchCategories(); // تحديث عدد المنتجات في التصنيفات
+                globalState.triggerNotificationRefresh();
             } catch (error) {
                 this.saveError = error.response?.data?.message || "فشل حفظ البيانات. تحقق من الاتصال.";
             } finally {
@@ -1137,12 +1157,12 @@ export default {
         openModal(mode, item = null) {
             this.modalMode = mode;
             this.saveError = "";
-            this.formErrors = { name: "", category: "" };
+            this.formErrors = { name: "", category_id: "" };
 
             if (mode === "create") {
                 this.form = {
                     name: "",
-                    category: DEFAULT_CATEGORIES[0],
+                    category_id: this.categories[0]?.id || null,
                     min_price: "",
                     image_url: "",
                 };
@@ -1150,7 +1170,7 @@ export default {
             } else {
                 this.form = {
                     name: item.name || "",
-                    category: item.category || DEFAULT_CATEGORIES[0],
+                    category_id: item.category_id || (this.categories.find(c => c.name === item.category)?.id) || null,
                     min_price: item.raw_min_price || item.min_price || "",
                     image_url: item.image_url || item.image || "",
                 };
@@ -1163,7 +1183,7 @@ export default {
             this.showModal = false;
             this.currentItemId = null;
             this.saveError = "";
-            this.formErrors = { name: "", category: "" };
+            this.formErrors = { name: "", category_id: "" };
         },
 
         confirmDelete(item) {
@@ -1173,7 +1193,7 @@ export default {
         },
 
         validateForm() {
-            this.formErrors = { name: "", category: "" };
+            this.formErrors = { name: "", category_id: "" };
             let valid = true;
 
             if (!this.form.name.trim()) {
@@ -1184,8 +1204,8 @@ export default {
                 valid = false;
             }
 
-            if (!this.form.category) {
-                this.formErrors.category = "يرجى اختيار فئة المنتج.";
+            if (!this.form.category_id) {
+                this.formErrors.category_id = "يرجى اختيار فئة المنتج.";
                 valid = false;
             }
 

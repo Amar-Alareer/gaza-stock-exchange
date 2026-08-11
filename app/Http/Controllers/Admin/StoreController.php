@@ -264,20 +264,29 @@ class StoreController extends Controller
             'category.required' => 'فئة الصنف مطلوبة',
         ]);
 
-        // 1. البحث عن المنتج أو إنشائه
+        // 1. الحصول على التصنيف لربط category_id
+        $categoryName = trim($request->category);
+        $categoryObj = \App\Models\Category::firstOrCreate(
+            ['name' => $categoryName],
+            ['slug' => \Illuminate\Support\Str::slug($categoryName)]
+        );
+
+        // 2. البحث عن المنتج أو إنشائه
         $item = Item::firstOrCreate(
             ['name' => trim($request->name)],
             [
-                'category' => trim($request->category),
-                'image_url' => $request->image_url ? trim($request->image_url) : null,
-                'min_price' => $request->price ? floatval($request->price) : null,
+                'category'    => $categoryName,
+                'category_id' => $categoryObj->id,
+                'image_url'   => $request->image_url ? trim($request->image_url) : null,
+                'min_price'   => $request->price ? floatval($request->price) : null,
             ]
         );
 
         // تحديث بيانات المنتج إذا كانت الفئة أو الصورة قد أضيفت
         $updated = false;
-        if ($request->category && $item->category !== trim($request->category)) {
-            $item->category = trim($request->category);
+        if (!$item->category_id || ($request->category && $item->category !== $categoryName)) {
+            $item->category    = $categoryName;
+            $item->category_id = $categoryObj->id;
             $updated = true;
         }
         if ($request->image_url && $item->image_url !== trim($request->image_url)) {

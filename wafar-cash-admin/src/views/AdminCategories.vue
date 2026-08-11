@@ -309,15 +309,58 @@
                                     <span v-if="formErrors.name" class="form-error-msg">{{ formErrors.name }}</span>
                                 </div>
 
-                                <!-- أيقونة التصنيف أو رابط الصورة -->
+                                <!-- أيقونة أو صورة التصنيف -->
                                 <div class="form-group">
-                                    <label class="form-label">الأيقونة / الإيموجي أو رابط الصورة</label>
-                                    <div class="icon-picker-input-wrap">
+                                    <label class="form-label">
+                                        صورة أو أيقونة التصنيف
+                                        <span class="form-hint">اختياري</span>
+                                    </label>
+
+                                    <!-- منطقة رفع ومعاينة الصورة -->
+                                    <div class="cat-image-upload-wrapper">
+                                        <!-- معاينة الصورة المحددة / المرفوعة -->
+                                        <div v-if="form.icon && !isEmoji(form.icon)" class="cat-image-preview-card">
+                                            <img :src="form.icon" alt="معاينة التصنيف" class="cat-image-preview-img" @error="handleImgError" />
+                                            <div class="cat-image-preview-actions">
+                                                <button type="button" class="btn-img-action btn-img-change" @click="triggerFileInput" title="تغيير الصورة">
+                                                    <UploadIcon :size="14" /> تغيير الصورة
+                                                </button>
+                                                <button type="button" class="btn-img-action btn-img-remove" @click="removeFormImage" title="إزالة الصورة">
+                                                    <Trash2Icon :size="14" /> إزالة
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- منطقة الرفع / السحب والإسقاط -->
+                                        <div
+                                            v-else
+                                            class="cat-image-dropzone"
+                                            @click="triggerFileInput"
+                                            @dragover.prevent
+                                            @drop.prevent="handleFileDrop"
+                                        >
+                                            <UploadIcon :size="24" class="dropzone-icon" />
+                                            <span class="dropzone-text">اختر صورة من جهازك أو اسحبها هنا</span>
+                                            <span class="dropzone-subtext">PNG, JPG, WEBP (بحد أقصى 5 ميجابايت)</span>
+                                        </div>
+
+                                        <input
+                                            type="file"
+                                            ref="fileInputRef"
+                                            class="hidden-file-input"
+                                            accept="image/*"
+                                            @change="handleFileUpload"
+                                            style="display: none"
+                                        />
+                                    </div>
+
+                                    <!-- إدخال رابط أو إيموجي يدوي -->
+                                    <div class="icon-picker-input-wrap" style="margin-top: 10px;">
                                         <input
                                             v-model="form.icon"
                                             type="text"
                                             class="form-input"
-                                            placeholder="اختر إيموجي من القائمة أو ادخل رابط صورة..."
+                                            placeholder="أو أدخل رابط صورة مباشر أو إيموجي (مثل 🥦)..."
                                         />
                                         <div class="icon-preview-badge">
                                             <span v-if="isEmoji(form.icon)">{{ form.icon }}</span>
@@ -325,9 +368,10 @@
                                             <span v-else>📦</span>
                                         </div>
                                     </div>
-                                    <!-- قائمة صور سريعة -->
+
+                                    <!-- قائمة صور مقترحة سريعة -->
                                     <div class="quick-icons-palette">
-                                        <span class="palette-title">اختيار سريع:</span>
+                                        <span class="palette-title">صور جاهزة:</span>
                                         <button
                                             v-for="imgObj in presetImages"
                                             :key="imgObj.label"
@@ -457,12 +501,19 @@
                                 <!-- عينة المنتجات التابعة لهذا التصنيف -->
                                 <div class="preview-products-section">
                                     <h4>عينة من المنتجات في هذا التصنيف:</h4>
-                                    <div class="mock-products-list">
-                                        <div v-for="n in Math.min(previewCategory?.count || 4, 4)" :key="n" class="mock-product-item">
+                                    <div class="mock-products-list" v-if="previewCategory?.items && previewCategory.items.length > 0">
+                                        <div v-for="item in previewCategory.items.slice(0, 6)" :key="item.id || item.name" class="mock-product-item">
                                             <span class="mock-dot"></span>
-                                            <span>{{ previewCategory?.name }} - صنف رقم {{ n }}</span>
+                                            <span>{{ item.name }}</span>
                                         </div>
                                     </div>
+                                    <div v-else-if="previewCategory?.count > 0" class="mock-products-list">
+                                        <div v-for="n in Math.min(previewCategory.count, 4)" :key="n" class="mock-product-item">
+                                            <span class="mock-dot"></span>
+                                            <span>صنف مسجل رقم {{ n }}</span>
+                                        </div>
+                                    </div>
+                                    <p v-else style="font-size: 0.85rem; color: #94a3b8; padding: 6px 0;">لا توجد منتجات مسجلة في هذا التصنيف حالياً.</p>
                                 </div>
                             </div>
 
@@ -485,6 +536,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
+import apiClient from "../api/axios.js";
 import AdminSidebar from "../components/AdminSidebar.vue";
 import AdminHeader from "../components/AdminHeader.vue";
 
@@ -503,23 +555,48 @@ import {
     CheckCircle as CheckCircleIcon,
     AlertCircle as AlertCircleIcon,
     Check as CheckIcon,
+    Upload as UploadIcon,
 } from "@lucide/vue";
 
 const router = useRouter();
 
 // ==========================================
-// 1. البيانات المحاكاة (Mock Data - Local Array)
+// 1. البيانات القادمة من قاعدة البيانات (Backend Data)
 // ==========================================
-const categories = ref([
-    { id: 1, name: "زيوت ودهون", icon: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&auto=format&fit=crop&q=80", count: 60, status: "active", description: "زيوت الطهي، السمن، والزيوت النباتية المعتمدة عالية الجودة" },
-    { id: 2, name: "مواد غذائية أساسية", icon: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300&auto=format&fit=crop&q=80", count: 150, status: "active", description: "الأرز، السكر، الطحين، البقوليات والمعكرونة بمختلف أنواعها" },
-    { id: 3, name: "فواكه", icon: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=300&auto=format&fit=crop&q=80", count: 95, status: "active", description: "الفواكه الطازجة والمجمدة المحلية والمستوردة يومياً" },
-    { id: 4, name: "خضراوات", icon: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&auto=format&fit=crop&q=80", count: 124, status: "active", description: "الخضراوات الطازجة والورقية الصازجة من المزارع مباشرة" },
-    { id: 5, name: "مشروبات", icon: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=300&auto=format&fit=crop&q=80", count: 92, status: "active", description: "العصائر الطبيعية، المياه المعدنية والمشروبات المنعشة" },
-    { id: 6, name: "ألبان وأجبان", icon: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&auto=format&fit=crop&q=80", count: 88, status: "active", description: "الحليب الطازج، الأجبان واللبن ومشتقات الحليب" },
-    { id: 7, name: "لحوم ودواجن", icon: "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=500&auto=format&fit=crop&q=80", count: 110, status: "active", description: "اللحوم الحمراء الطازجة والدواجن والأسماك المنظفة" },
-    { id: 8, name: "مخبوزات", icon: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&auto=format&fit=crop&q=80", count: 75, status: "active", description: "الخبز الطازج يومياً، المعجنات والكعك اللذيذ" },
-]);
+const categories = ref([]);
+const isLoading = ref(false);
+const isSubmitting = ref(false);
+const isDeleting = ref(false);
+
+const mapCategory = (cat) => ({
+    id: cat.id,
+    name: cat.name,
+    icon: cat.image || "📦",
+    count: cat.items_count !== undefined ? cat.items_count : (cat.items ? cat.items.length : 0),
+    status: (cat.is_active === 1 || cat.is_active === true || cat.is_active === "1") ? "active" : "inactive",
+    description: cat.description || "",
+    is_active: cat.is_active,
+    slug: cat.slug,
+    items: cat.items || []
+});
+
+const fetchCategories = async () => {
+    isLoading.value = true;
+    try {
+        const response = await apiClient.get("/categories");
+        const raw = Array.isArray(response.data) ? response.data : (response.data.categories || []);
+        categories.value = raw.map(mapCategory);
+    } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        showToast("فشل في جلب التصنيفات من الخادم", "danger");
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchCategories();
+});
 
 // قائمة الصور السريعة للاختيار
 const presetImages = [
@@ -667,7 +744,7 @@ const closeModal = () => {
     formErrors.name = "";
 };
 
-const saveCategory = () => {
+const saveCategory = async () => {
     // التحقق من الحقول
     formErrors.name = "";
     if (!form.name.trim()) {
@@ -675,37 +752,44 @@ const saveCategory = () => {
         return;
     }
 
-    if (modalMode.value === "create") {
-        const newId = categories.value.length ? Math.max(...categories.value.map((c) => c.id)) + 1 : 1;
-        categories.value.unshift({
-            id: newId,
-            name: form.name.trim(),
-            icon: form.icon.trim() || "📦",
-            count: form.count || 0,
-            status: form.status,
-            description: form.description.trim(),
-        });
-        showToast("تمت إضافة التصنيف الجديد بنجاح! ✨", "success");
-    } else {
-        const idx = categories.value.findIndex((c) => c.id === form.id);
-        if (idx !== -1) {
-            categories.value[idx] = {
-                ...categories.value[idx],
-                name: form.name.trim(),
-                icon: form.icon.trim() || "📦",
-                count: form.count || 0,
-                status: form.status,
-                description: form.description.trim(),
-            };
+    isSubmitting.value = true;
+    const payload = {
+        name: form.name.trim(),
+        image: form.icon ? form.icon.trim() : null,
+        description: form.description ? form.description.trim() : null,
+        is_active: form.status === "active" ? 1 : 0,
+    };
+
+    try {
+        if (modalMode.value === "create") {
+            const response = await apiClient.post("/categories", payload);
+            const createdCat = response.data.category || response.data;
+            categories.value.unshift(mapCategory(createdCat));
+            showToast("تمت إضافة التصنيف الجديد بنجاح! ✨", "success");
+        } else {
+            const response = await apiClient.put(`/categories/${form.id}`, payload);
+            const updatedCat = response.data.category || response.data;
+            const idx = categories.value.findIndex((c) => c.id === form.id);
+            if (idx !== -1) {
+                categories.value[idx] = mapCategory(updatedCat);
+            }
             showToast("تم تحديث بيانات التصنيف بنجاح! ✏️", "success");
         }
+        closeModal();
+    } catch (err) {
+        console.error("Failed to save category:", err);
+        if (err.response?.data?.errors?.name) {
+            formErrors.name = err.response.data.errors.name[0];
+        }
+        const errorMsg = err.response?.data?.message || "حدث خطأ أثناء حفظ التصنيف";
+        showToast(errorMsg, "danger");
+    } finally {
+        isSubmitting.value = false;
     }
-
-    closeModal();
 };
 
 // ==========================================
-// 5. الحذف المعاينة والمعاينة
+// 5. الحذف والمعاينة
 // ==========================================
 const showDeleteConfirm = ref(false);
 const categoryToDelete = ref(null);
@@ -715,12 +799,22 @@ const confirmDelete = (cat) => {
     showDeleteConfirm.value = true;
 };
 
-const deleteCategory = () => {
+const deleteCategory = async () => {
     if (!categoryToDelete.value) return;
-    categories.value = categories.value.filter((c) => c.id !== categoryToDelete.value.id);
-    showToast(`تم حذف تصنيف "${categoryToDelete.value.name}" بنجاح.`, "danger");
-    showDeleteConfirm.value = false;
-    categoryToDelete.value = null;
+    isDeleting.value = true;
+    try {
+        await apiClient.delete(`/categories/${categoryToDelete.value.id}`);
+        categories.value = categories.value.filter((c) => c.id !== categoryToDelete.value.id);
+        showToast(`تم حذف تصنيف "${categoryToDelete.value.name}" بنجاح.`, "danger");
+        showDeleteConfirm.value = false;
+        categoryToDelete.value = null;
+    } catch (err) {
+        console.error("Failed to delete category:", err);
+        const errorMsg = err.response?.data?.message || "حدث خطأ أثناء حذف التصنيف";
+        showToast(errorMsg, "danger");
+    } finally {
+        isDeleting.value = false;
+    }
 };
 
 // المعاينة
@@ -736,6 +830,45 @@ const openPreviewModal = (cat) => {
 const isEmoji = (str) => {
     if (!str) return false;
     return !str.startsWith("http://") && !str.startsWith("https://") && !str.startsWith("data:");
+};
+
+// إدارة رفع صورة التصنيف من الجهاز
+const fileInputRef = ref(null);
+
+const triggerFileInput = () => {
+    fileInputRef.value?.click();
+};
+
+const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+        showToast("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت", "danger");
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        form.icon = event.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+const handleFileDrop = (e) => {
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+        showToast("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت", "danger");
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        form.icon = event.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+const removeFormImage = () => {
+    form.icon = "📦";
 };
 
 const handleImgError = (e) => {
@@ -1676,6 +1809,111 @@ const handleLogout = () => {
 }
 
 .toast-close:hover { color: #ffffff; }
+
+/* 11. Category Image Upload & Preview Styles */
+.form-hint {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-right: 6px;
+    font-weight: normal;
+}
+
+.cat-image-upload-wrapper {
+    margin-bottom: 8px;
+}
+
+.cat-image-preview-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.cat-image-preview-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #cbd5e1;
+}
+
+.cat-image-preview-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-img-action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-img-change {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.btn-img-change:hover {
+    background: #dcfce7;
+}
+
+.btn-img-remove {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.btn-img-remove:hover {
+    background: #fee2e2;
+}
+
+.cat-image-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.cat-image-dropzone:hover {
+    border-color: var(--wc-green-bright, #22c55e);
+    background: #f0fdf4;
+}
+
+.dropzone-icon {
+    color: var(--wc-green-bright, #22c55e);
+    margin-bottom: 8px;
+}
+
+.dropzone-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 2px;
+}
+
+.dropzone-subtext {
+    font-size: 11px;
+    color: #94a3b8;
+}
 
 /* Transitions */
 .fade-slide-enter-active,
