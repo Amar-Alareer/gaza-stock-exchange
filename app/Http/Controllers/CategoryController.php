@@ -12,7 +12,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::with('items')->get();
+        $categories = Category::withCount('items')->with('items')->orderBy('id', 'desc')->get();
         return response()->json($categories, 200);
     }
 
@@ -20,9 +20,25 @@ class CategoryController extends Controller
     public function store(StoreCategoryRequest $request)
     {
         $data = $request->validated();
-        $data['slug'] = Str::slug($request->name);
+        
+        $baseSlug = Str::slug($request->name);
+        if (empty($baseSlug)) {
+            $baseSlug = 'category';
+        }
+        $slug = $baseSlug;
+        $counter = 1;
+        while (Category::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        $data['slug'] = $slug;
+
+        if (!isset($data['is_active'])) {
+            $data['is_active'] = true;
+        }
 
         $category = Category::create($data);
+        $category->loadCount('items');
 
         return response()->json([
             'message'  => 'تم إضافة التصنيف بنجاح',
@@ -33,7 +49,7 @@ class CategoryController extends Controller
 
     public function show($id)
     {
-        $category = Category::with('items')->find($id);
+        $category = Category::withCount('items')->with('items')->find($id);
 
         if (!$category) {
             return response()->json(['message' => 'التصنيف غير موجود'], 404);
@@ -54,10 +70,21 @@ class CategoryController extends Controller
         $data = $request->validated();
 
         if (isset($data['name'])) {
-            $data['slug'] = Str::slug($request->name);
+            $baseSlug = Str::slug($request->name);
+            if (empty($baseSlug)) {
+                $baseSlug = 'category';
+            }
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Category::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+            $data['slug'] = $slug;
         }
 
         $category->update($data);
+        $category->loadCount('items');
 
         return response()->json([
             'message'  => 'تم تعديل التصنيف بنجاح',

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->string('name');
             $table->string('category');
+            $table->longText('image_url')->nullable();
+            $table->decimal('min_price', 10, 2)->nullable();
             $table->timestamps();
         });
     }

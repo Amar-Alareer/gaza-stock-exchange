@@ -54,79 +54,111 @@ class NotificationController extends Controller
             // يتخطى الأخطاء إن وجدت لضمان عدم توقف النظام
         }
 
-        // 2. إشعارات تحديث المنتجات والأسعار
+        // 2. إشعارات الأصناف (Items) المضافة أو المعدَّلة مباشرة
         try {
-            $prices = Price::with(['item', 'store'])
-                ->orderBy('updated_at', 'desc')
+            $items = \App\Models\Item::orderBy('updated_at', 'desc')
                 ->limit(10)
                 ->get();
 
+            foreach ($items as $item) {
+                $diffSeconds = $item->created_at && $item->updated_at
+                    ? $item->created_at->diffInSeconds($item->updated_at)
+                    : 999;
+                $isNew = $diffSeconds < 10;
+                $notifId = $isNew
+                    ? 'item_create_' . $item->id
+                    : 'item_update_' . $item->id . '_' . ($item->updated_at ? $item->updated_at->timestamp : '');
+                $timestamp = $item->updated_at ?? $item->created_at;
+
+                $notifications->push([
+                    'id'        => $notifId,
+                    'type'      => 'product',
+                    'title'     => $isNew ? 'صنف جديد' : 'تعديل صنف',
+                    'message'   => $isNew
+                        ? 'تم إضافة الصنف الجديد "' . $item->name . '" إلى قائمة الأصناف.'
+                        : 'تم تعديل بيانات الصنف "' . $item->name . '"' . ($item->category ? ' (الفئة: ' . $item->category . ')' : '') . '.',
+                    'link'      => '/items',
+                    'timestamp' => $timestamp ? $timestamp->toIso8601String() : now()->toIso8601String(),
+                    'raw_time'  => $timestamp ? $timestamp->timestamp : 0,
+                    'time_ago'  => $timestamp ? $this->humanTimeArabic($timestamp) : 'مؤخراً',
+                    'is_read'   => in_array($notifId, $readIds),
+                ]);
+            }
+        } catch (\Exception $e) {}
+
+        // 3. إشعارات تحديث الأسعار عبر جدول prices
+        try {
+            $prices = Price::with(['item', 'store'])
+                ->orderBy('updated_at', 'desc')
+                ->limit(8)
+                ->get();
+
             foreach ($prices as $price) {
-                $itemName = $price->item->name ?? 'منتج';
+                $itemName  = $price->item->name ?? 'منتج';
                 $storeName = $price->store->name ?? 'متجر';
-                $notifId = 'price_update_'.$price->id.'_'.($price->updated_at ? $price->updated_at->timestamp : rand(1000, 9999));
+                $notifId   = 'price_update_' . $price->id . '_' . ($price->updated_at ? $price->updated_at->timestamp : rand(1000, 9999));
                 $timestamp = $price->updated_at ?? $price->created_at;
 
                 $notifications->push([
-                    'id' => $notifId,
-                    'type' => 'product',
-                    'title' => 'تحديث سعر/منتج',
-                    'message' => 'تم تحديث سعر "'.$itemName.'" في "'.$storeName.'" إلى '.$price->price.' شيكل.',
-                    'link' => '/products',
+                    'id'        => $notifId,
+                    'type'      => 'product',
+                    'title'     => 'تحديث سعر',
+                    'message'   => 'تم تحديث سعر "' . $itemName . '" في "' . $storeName . '" إلى ' . $price->price . ' شيكل.',
+                    'link'      => '/stores',
                     'timestamp' => $timestamp ? $timestamp->toIso8601String() : now()->toIso8601String(),
-                    'raw_time' => $timestamp ? $timestamp->timestamp : 0,
-                    'time_ago' => $timestamp ? $this->humanTimeArabic($timestamp) : 'مؤخراً',
-                    'is_read' => in_array($notifId, $readIds),
+                    'raw_time'  => $timestamp ? $timestamp->timestamp : 0,
+                    'time_ago'  => $timestamp ? $this->humanTimeArabic($timestamp) : 'مؤخراً',
+                    'is_read'   => in_array($notifId, $readIds),
                 ]);
             }
         } catch (\Exception $e) {
         }
 
-        // 3. إشعارات المقالات
+        // 4. إشعارات المقالات
         try {
             $articles = Article::orderBy('updated_at', 'desc')
                 ->limit(5)
                 ->get();
 
             foreach ($articles as $article) {
-                $notifId = 'article_'.$article->id.'_'.($article->updated_at ? $article->updated_at->timestamp : rand(1000, 9999));
+                $notifId   = 'article_' . $article->id . '_' . ($article->updated_at ? $article->updated_at->timestamp : rand(1000, 9999));
                 $timestamp = $article->updated_at ?? $article->created_at;
 
                 $notifications->push([
-                    'id' => $notifId,
-                    'type' => 'article',
-                    'title' => 'مقال جديد / محدث',
-                    'message' => 'تم نشر أو تعديل مقال بعنوان "'.$article->title.'".',
-                    'link' => '/articles',
+                    'id'        => $notifId,
+                    'type'      => 'article',
+                    'title'     => 'مقال جديد / محدث',
+                    'message'   => 'تم نشر أو تعديل مقال بعنوان "' . $article->title . '".',
+                    'link'      => '/articles',
                     'timestamp' => $timestamp ? $timestamp->toIso8601String() : now()->toIso8601String(),
-                    'raw_time' => $timestamp ? $timestamp->timestamp : 0,
-                    'time_ago' => $timestamp ? $this->humanTimeArabic($timestamp) : 'مؤخراً',
-                    'is_read' => in_array($notifId, $readIds),
+                    'raw_time'  => $timestamp ? $timestamp->timestamp : 0,
+                    'time_ago'  => $timestamp ? $this->humanTimeArabic($timestamp) : 'مؤخراً',
+                    'is_read'   => in_array($notifId, $readIds),
                 ]);
             }
         } catch (\Exception $e) {
         }
 
-        // 4. إشعارات الشكاوى
+        // 5. إشعارات الشكاوى
         try {
             $complaints = Complaints::orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get();
 
             foreach ($complaints as $complaint) {
-                $notifId = 'complaint_'.$complaint->id;
+                $notifId   = 'complaint_' . $complaint->id;
                 $timestamp = $complaint->created_at;
 
                 $notifications->push([
-                    'id' => $notifId,
-                    'type' => 'complaint',
-                    'title' => 'شكوى جديدة',
-                    'message' => 'تم استلام شكوى جديدة تتعلق بالخدمة أو الأسعار.',
-                    'link' => '/stores',
+                    'id'        => $notifId,
+                    'type'      => 'complaint',
+                    'title'     => 'شكوى جديدة',
+                    'message'   => 'تم استلام شكوى جديدة تتعلق بالخدمة أو الأسعار.',
+                    'link'      => '/stores',
                     'timestamp' => $timestamp ? $timestamp->toIso8601String() : now()->toIso8601String(),
-                    'raw_time' => $timestamp ? $timestamp->timestamp : 0,
-                    'time_ago' => $timestamp ? $this->humanTimeArabic($timestamp) : 'مؤخراً',
-                    'is_read' => in_array($notifId, $readIds),
+                    'raw_time'  => $timestamp ? $timestamp->timestamp : 0,
+                    'time_ago'  => $timestamp ? $this->humanTimeArabic($timestamp) : 'مؤخراً',
+                    'is_read'   => in_array($notifId, $readIds),
                 ]);
             }
         } catch (\Exception $e) {

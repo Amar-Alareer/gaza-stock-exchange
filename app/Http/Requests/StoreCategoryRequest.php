@@ -14,11 +14,19 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => 'required|string|max:255',
+            'name'        => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string',
             'image'       => 'nullable|string',
             'is_active'   => 'nullable|boolean',
             'sort_order'  => 'nullable|integer',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'اسم التصنيف مطلوب',
+            'name.unique'   => 'اسم التصنيف مضاف مسبقاً، يرجى اختيار اسم آخر',
         ];
     }
 }

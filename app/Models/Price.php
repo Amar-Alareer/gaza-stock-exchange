@@ -14,11 +14,6 @@ class Price extends Model
 
     ];
 
-    public function stores()
-    {
-        return $this->belongsTo(Store::class, 'store_id');
-    }
-
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id');
