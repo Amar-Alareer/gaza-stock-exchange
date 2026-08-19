@@ -20,6 +20,11 @@ Route::get('/articles/{id}', [ArticleController::class, 'show']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+ //العملاء
+ Route::post('/customers', [CustomerController::class, 'store']);
+Route::get('/customers', [CustomerController::class, 'index']);
+Route::get('/customers/{id}', [CustomerController::class, 'show']);
+Route::put('/customers/{id}', [CustomerController::class, 'update']);
 
 Route::get('categories', [CategoryController::class, 'index']);
 Route::post('categories', [CategoryController::class, 'store']);
