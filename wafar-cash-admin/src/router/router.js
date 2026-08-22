@@ -88,6 +88,28 @@ const routes = [
             requiresAuth: true, // 🔒 تحتاج توكن
         },
     },
+
+    // ——— صفحة 7: إدارة المقارنات ———
+    {
+        path: "/comparisons",
+        name: "AdminComparisons",
+        component: () => import("../views/AdminComparisons.vue"),
+        meta: {
+            title: "إدارة المقارنات",
+            requiresAuth: true, // 🔒 تحتاج توكن
+        },
+    },
+
+    // ——— صفحة 8: إدارة العملاء ———
+    {
+        path: "/customers",
+        name: "AdminCustomers",
+        component: () => import("../views/AdminCustomers.vue"),
+        meta: {
+            title: "إدارة العملاء",
+            requiresAuth: true, // 🔒 تحتاج توكن
+        },
+    },
     // ——— صفحة تفاصيل المتجر ———
     {
         path: "/stores/:id",
@@ -105,7 +127,7 @@ const routes = [
         name: "ProfileSettings",
         component: ProfileSettings,
         meta: {
-            title: "إعدادات الملف الشخصي",
+            title: "إعدادات النظام والمنصة",
             requiresAuth: true, // 🔒 تحتاج توكن
         },
     },

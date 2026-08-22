@@ -58,26 +58,27 @@
                 <span>التصنيفات</span>
             </router-link>
 
-            <a href="#" @click.prevent class="sidebar__item">
+            <router-link
+                to="/comparisons"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
                 <span class="sidebar__icon">
                     <BarChart2Icon :size="18" />
                 </span>
                 <span>المقارنات</span>
-            </a>
+            </router-link>
 
-            <a href="#" @click.prevent class="sidebar__item">
-                <span class="sidebar__icon">
-                    <FileTextIcon :size="18" />
-                </span>
-                <span>الطلبات</span>
-            </a>
-
-            <a href="#" @click.prevent class="sidebar__item">
+            <router-link
+                to="/customers"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
                 <span class="sidebar__icon">
                     <UsersIcon :size="18" />
                 </span>
                 <span>العملاء</span>
-            </a>
+            </router-link>
 
             <router-link
                 to="/profile"

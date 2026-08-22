@@ -143,7 +143,7 @@ class DashboardController extends Controller
                     'title' => $item->name,
                     'subtitle' => 'الفئة: '.($item->category ?? 'غير مصنف'),
                     'type' => 'منتج',
-                    'link' => '/products', // يمكنك تعديله لمسار صفحة المنتجات في الـ Vue
+                    'link' => '/items',
                 ];
             });
 
