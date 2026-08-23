@@ -13,11 +13,14 @@ return new class extends Migration
     {
         // الاصناف
         Schema::create('items', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('category');
-            $table->timestamps();
-        });
+    $table->id();
+    $table->string('name');
+    $table->string('category')->nullable(); // أو اجعله قابل للإلغاء
+    $table->decimal('price', 8, 2);         // إضافة عمود السعر
+    $table->string('unit');                 // إضافة عمود الوحدة
+    $table->string('store_name');           // إضافة عمود اسم المتجر
+    $table->timestamps();
+});
     }
 
     /**

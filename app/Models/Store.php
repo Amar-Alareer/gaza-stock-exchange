@@ -23,9 +23,8 @@ class Store extends Model
         'cover_image',
     ];
 
-    /**
-     * رابط الصورة الكامل
-     */
+    protected $appends = ['image_url', 'cover_image_url'];
+
     public function getImageUrlAttribute(): ?string
     {
         if (! $this->image) {
@@ -43,8 +42,6 @@ class Store extends Model
 
         return url('storage/'.$this->cover_image);
     }
-
-    protected $appends = ['image_url', 'cover_image_url'];
 
     public function region()
     {

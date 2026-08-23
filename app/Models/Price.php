@@ -11,10 +11,9 @@ class Price extends Model
         'source',
         'store_id',
         'item_id',
-
     ];
 
-    public function stores()
+    public function store()
     {
         return $this->belongsTo(Store::class, 'store_id');
     }
@@ -22,10 +21,5 @@ class Price extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id');
-    }
-
-    public function store()
-    {
-        return $this->belongsTo(Store::class, 'store_id');
     }
 }

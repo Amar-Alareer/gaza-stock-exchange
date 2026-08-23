@@ -32,7 +32,6 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // 1. التحقق من المدخلات
         $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',

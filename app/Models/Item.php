@@ -2,27 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Item extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
+        'price',      // إضافة السعر
+        'unit',       // إضافة الوحدة
+        'store_name', // إضافة اسم المتجر
         'category',
     ];
 
     public function prices()
     {
-        return $this->hasMany(Price::class);
-    }
-
-    public function item()
-    {
-        return $this->belongsTo(Item::class);
-    }
-
-    public function store()
-    {
-        return $this->belongsTo(Store::class);
+        return $this->hasMany(Price::class, 'item_id');
     }
 }

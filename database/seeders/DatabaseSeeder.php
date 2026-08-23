@@ -2,24 +2,31 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $stores = ['مول لاكاسا', 'محلات عمو عماد', 'مول التاج', 'مذبح التاج', 'سوبرماركت المدينة'];
+        $units = ['1 كيلو', '25 كيلو', '750 غرام', '1 لتر', 'حبة'];
+        $products = ['طحين', 'بندورة', 'سكر', 'صابون الغسيل', 'دجاج', 'زيت زيتون', 'أرز'];
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $data = [];
+
+        for ($i = 0; $i < 20; $i++) {
+            $data[] = [
+                'name'       => $products[array_rand($products)],
+                'price'      => rand(5, 100),
+                'unit'       => $units[array_rand($units)],
+                'store_name' => $stores[array_rand($stores)],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // إدخال 20 صف دفعة واحدة في جدول items بدون حاجة لفاكتوري أو نت
+        DB::table('items')->insert($data);
     }
 }
