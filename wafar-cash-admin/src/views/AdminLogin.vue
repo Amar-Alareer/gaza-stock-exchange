@@ -218,6 +218,13 @@ export default {
 
                 // ——— حفظ التوكن ومعلومات المستخدم في الـ localStorage ———
                 const { token, user } = response.data;
+
+                // ——— التحقق من أن الحساب يملك دور مسؤول (Admin) ———
+                if (user && user.role !== "admin") {
+                    this.errorMsg = "عذراً، هذا الحساب عميل (Client) وليس لديه صلاحيات المسؤول (Admin) للوصول للوحة التحكم.";
+                    return;
+                }
+
                 localStorage.setItem("wafar_token", token);
                 localStorage.setItem("wafar_user", JSON.stringify(user));
 

@@ -261,9 +261,12 @@
                     <EditIcon :size="14" />
                   </button>
                   <div class="product-image-wrap">
-                    <div class="product-image-placeholder">
-                      <PackageIcon :size="32" />
-                    </div>
+                    <img
+                      :src="getItemImage(product)"
+                      :alt="product.name"
+                      class="product-image"
+                      @error="handleImageError($event, product)"
+                    />
                   </div>
                   <div class="product-details">
                     <h3 class="product-name">{{ product.name }}</h3>
@@ -275,6 +278,7 @@
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </template>
@@ -457,8 +461,141 @@
         </div>
       </div>
     </div>
+
+    <!-- ======= مودال إضافة / تعديل منتج للمتجر (مطابق لمودال إدارة المنتجات) ======= -->
+    <div v-if="showProductModal" class="modal-overlay" @click.self="closeProductModal">
+      <div class="modal modal--edit-item" role="dialog" aria-modal="true">
+        <div class="modal__header">
+          <h2 class="modal__title">
+            <PackageIcon :size="18" style="color: var(--wc-green-bright)" />
+            {{ productModalMode === 'create' ? 'إضافة صنف جديد للمتجر' : 'تعديل بيانات الصنف' }}
+          </h2>
+          <button class="modal__close" @click="closeProductModal" title="إغلاق (Esc)">&times;</button>
+        </div>
+        <div class="modal__body">
+          <div v-if="productSaveError" class="error-alert">
+            <AlertCircleIcon :size="15" />
+            <span>{{ productSaveError }}</span>
+          </div>
+
+          <!-- 1. رفع ومعاينة صورة المنتج -->
+          <div class="form-group">
+            <label class="form-label">
+              صورة المنتج
+              <span class="form-hint">اختياري</span>
+            </label>
+
+            <div class="image-upload-wrapper">
+              <!-- معاينة الصورة الحالية -->
+              <div v-if="productForm.image_url" class="image-preview-card">
+                <img :src="productForm.image_url" alt="معاينة المنتج" class="image-preview-img" />
+                <div class="image-preview-actions">
+                  <button type="button" class="btn-img-action btn-img-change" @click="triggerProductFileInput" title="تغيير الصورة">
+                    <UploadIcon :size="14" /> تغيير
+                  </button>
+                  <button type="button" class="btn-img-action btn-img-remove" @click="removeProductFormImage" title="إزالة الصورة">
+                    <Trash2Icon :size="14" /> إزالة
+                  </button>
+                </div>
+              </div>
+
+              <!-- منطقة الرفع / السحب والإسقاط -->
+              <div
+                v-else
+                class="image-dropzone"
+                @click="triggerProductFileInput"
+                @dragover.prevent
+                @drop.prevent="handleProductFileDrop"
+              >
+                <UploadIcon :size="24" class="dropzone-icon" />
+                <span class="dropzone-text">اختر صورة أو اسحبها هنا</span>
+                <span class="dropzone-subtext">JPG, PNG, WEBP (بحد أقصى 5 ميجابايت)</span>
+              </div>
+
+              <input
+                type="file"
+                ref="productFileInput"
+                class="hidden-file-input"
+                accept="image/*"
+                @change="handleProductFileUpload"
+              />
+            </div>
+          </div>
+
+          <!-- 2. اسم الصنف -->
+          <div class="form-group">
+            <label class="form-label" for="store-item-name">
+              اسم الصنف <span class="required-star">*</span>
+            </label>
+            <input
+              v-model="productForm.name"
+              type="text"
+              id="store-item-name"
+              class="form-input"
+              :class="{ 'form-input--error': productFormErrors.name }"
+              placeholder="مثال: طماطم طازجة، أرز بسمتي، دجاج..."
+              @keyup.enter="saveProduct"
+            />
+            <span v-if="productFormErrors.name" class="field-error">{{ productFormErrors.name }}</span>
+          </div>
+
+          <!-- 3. قائمة الفئات الإجبارية (Select Dropdown) -->
+          <div class="form-group">
+            <label class="form-label" for="store-item-category">
+              فئة الصنف <span class="required-star">*</span>
+            </label>
+            <select
+              v-model="productForm.category"
+              id="store-item-category"
+              class="form-input form-select"
+              :class="{ 'form-input--error': productFormErrors.category }"
+            >
+              <option value="" disabled>اختر فئة المنتج...</option>
+              <option v-for="cat in DEFAULT_CATEGORIES" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+            <span v-if="productFormErrors.category" class="field-error">{{ productFormErrors.category }}</span>
+          </div>
+
+          <!-- 4. سعر المنتج للمتجر بالشيكل -->
+          <div class="form-group">
+            <label class="form-label" for="store-item-price">
+              سعر الصنف في هذا المتجر
+              <span class="form-hint">اختياري</span>
+            </label>
+            <div class="price-input-wrap">
+              <input
+                v-model="productForm.price"
+                type="number"
+                step="0.5"
+                min="0"
+                id="store-item-price"
+                class="form-input price-input"
+                placeholder="مثال: 12.5"
+                @keyup.enter="saveProduct"
+              />
+              <span class="price-unit-addon">شيكل</span>
+            </div>
+          </div>
+
+        </div>
+        <!-- أزرار الإجراءات المتناسقة -->
+        <div class="modal__footer modal__footer--balanced">
+          <button
+            class="btn-save btn-save--full"
+            @click="saveProduct"
+            :disabled="isSavingProduct"
+          >
+            <span v-if="isSavingProduct" class="btn-spinner"></span>
+            <span>{{ isSavingProduct ? (productModalMode === 'create' ? 'جارٍ إضافة الصنف...' : 'جارٍ حفظ التعديلات...') : (productModalMode === 'create' ? 'إضافة الصنف' : 'حفظ التعديلات') }}</span>
+          </button>
+          <button class="btn-cancel btn-cancel--full" @click="closeProductModal">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
+
 
 <script>
 import AdminSidebar from '../components/AdminSidebar.vue'
@@ -474,6 +611,67 @@ const GAZA_GOVERNORATES = [
   { value: "خان_يونس", label: "محافظة خان يونس", hint: "مثال: خان يونس البلد، الأمل، عبسان، بني سهيلا" },
   { value: "رفح", label: "محافظة رفح", hint: "مثال: الشابورة، تل السلطان، الجنينة، حي البرازيل" }
 ]
+
+const DEFAULT_CATEGORIES = [
+  "خضروات",
+  "فواكه",
+  "لحوم ودواجن",
+  "مواد تموينية",
+  "زيوت وبقوليات",
+  "ألبان وأجبان",
+  "مشروبات وحلويات",
+  "أخرى",
+]
+
+const CATEGORY_PALETTES = [
+  { bg: "#e8f5ea", color: "#15803d", border: "#bbf7d0" },
+  { bg: "#fff7ed", color: "#c2410c", border: "#fed7aa" },
+  { bg: "#fef9c3", color: "#a16207", border: "#fde68a" },
+  { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
+  { bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" },
+  { bg: "#fce7f3", color: "#be185d", border: "#fbcfe8" },
+  { bg: "#ecfeff", color: "#0e7490", border: "#a5f3fc" },
+  { bg: "#f0fdf4", color: "#166534", border: "#86efac" },
+]
+
+const _catColorCache = {}
+let _catColorCounter = 0
+
+function getCategoryPalette(category) {
+  if (!category) return { bg: "#f1f5f9", color: "#64748b", border: "#e2e8f0" }
+  if (!_catColorCache[category]) {
+    _catColorCache[category] = CATEGORY_PALETTES[_catColorCounter % CATEGORY_PALETTES.length]
+    _catColorCounter++
+  }
+  return _catColorCache[category]
+}
+
+const PRODUCT_THUMBNAILS = {
+  "جرادة": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&auto=format&fit=crop&q=80",
+  "بقدونس": "https://images.unsplash.com/photo-1592417817098-8f3d6eb231fc?w=100&auto=format&fit=crop&q=80",
+  "ورق عنب": "https://images.unsplash.com/photo-1509358271058-acd05cc93280?w=100&auto=format&fit=crop&q=80",
+  "طماطم": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=100&auto=format&fit=crop&q=80",
+  "خيار": "https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=100&auto=format&fit=crop&q=80",
+  "بطاطس": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=100&auto=format&fit=crop&q=80",
+  "بصل": "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cf?w=100&auto=format&fit=crop&q=80",
+  "ليمون": "https://images.unsplash.com/photo-1534531141161-e4e6e48a36e3?w=100&auto=format&fit=crop&q=80",
+  "أرز": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100&auto=format&fit=crop&q=80",
+  "زيت": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100&auto=format&fit=crop&q=80",
+  "دجاج": "https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=100&auto=format&fit=crop&q=80",
+  "لحم": "https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=100&auto=format&fit=crop&q=80",
+  "موز": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=100&auto=format&fit=crop&q=80",
+  "تفاح": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=100&auto=format&fit=crop&q=80",
+}
+
+function createSvgPlaceholder(name, category) {
+  const char = (name || "ص").charAt(0)
+  const palette = getCategoryPalette(category)
+  const bg = palette.bg
+  const color = palette.color
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="${bg}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="28" fill="${color}">${char}</text></svg>`
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
+
 
 import {
   Store as StoreIcon,
@@ -492,7 +690,9 @@ import {
   PackageOpen as PackageOpenIcon,
   Globe as GlobeIcon,
   Image as ImageIcon,
-  UploadCloud as UploadCloudIcon
+  UploadCloud as UploadCloudIcon,
+  Upload as UploadIcon,
+  Trash2 as Trash2Icon
 } from '@lucide/vue'
 
 export default {
@@ -516,7 +716,9 @@ export default {
     PackageOpenIcon,
     GlobeIcon,
     ImageIcon,
-    UploadCloudIcon
+    UploadCloudIcon,
+    UploadIcon,
+    Trash2Icon
   },
   data() {
     return {
@@ -530,7 +732,7 @@ export default {
       searchQuery: '',
       selectedCategory: '',
 
-      // نافذة التعديل
+      // نافذة التعديل للمتجر
       showEditModal: false,
       editForm: {},
       imageFile: null,
@@ -538,7 +740,25 @@ export default {
       imagePreview: null,
       coverImagePreview: null,
       isSaving: false,
-      formError: ''
+      formError: '',
+
+      // نافذة إضافة / تعديل صنف للمتجر
+      DEFAULT_CATEGORIES,
+      showProductModal: false,
+      productModalMode: 'create',
+      activeProduct: null,
+      productForm: {
+        name: '',
+        category: 'خضروات',
+        price: '',
+        image_url: ''
+      },
+      productFormErrors: {
+        name: '',
+        category: ''
+      },
+      isSavingProduct: false,
+      productSaveError: ''
     }
   },
   computed: {
@@ -563,8 +783,19 @@ export default {
   },
   mounted() {
     this.fetchStoreDetails()
+    window.addEventListener('keydown', this.handleKeyDown)
+  },
+  unmounted() {
+    window.removeEventListener('keydown', this.handleKeyDown)
   },
   methods: {
+    handleKeyDown(e) {
+      if (e.key === 'Escape') {
+        if (this.showProductModal) this.closeProductModal()
+        if (this.showEditModal) this.closeEditModal()
+      }
+    },
+
     async fetchStoreDetails() {
       this.isLoading = true
       this.errorMsg = ''
@@ -591,8 +822,177 @@ export default {
     },
 
     openAddProductModal() {
-      alert('سيتم فتح نافذة إضافة منتج جديد لهذا المتجر')
+      this.productModalMode = 'create'
+      this.activeProduct = null
+      this.productForm = {
+        name: '',
+        category: DEFAULT_CATEGORIES[0],
+        price: '',
+        image_url: ''
+      }
+      this.productFormErrors = { name: '', category: '' }
+      this.productSaveError = ''
+      this.showProductModal = true
     },
+
+    editProduct(product) {
+      this.productModalMode = 'edit'
+      this.activeProduct = product
+      this.productForm = {
+        name: product.name || '',
+        category: product.category || DEFAULT_CATEGORIES[0],
+        price: product.price || '',
+        image_url: product.image_url || ''
+      }
+      this.productFormErrors = { name: '', category: '' }
+      this.productSaveError = ''
+      this.showProductModal = true
+    },
+
+    closeProductModal() {
+      this.showProductModal = false
+      this.activeProduct = null
+      this.productSaveError = ''
+      this.productFormErrors = { name: '', category: '' }
+    },
+
+    validateProductForm() {
+      this.productFormErrors = { name: '', category: '' }
+      let valid = true
+
+      if (!this.productForm.name || !this.productForm.name.trim()) {
+        this.productFormErrors.name = 'اسم الصنف مطلوب.'
+        valid = false
+      } else if (this.productForm.name.trim().length < 2) {
+        this.productFormErrors.name = 'الاسم يجب أن يكون حرفين على الأقل.'
+        valid = false
+      }
+
+      if (!this.productForm.category) {
+        this.productFormErrors.category = 'يرجى اختيار فئة المنتج.'
+        valid = false
+      }
+
+      return valid
+    },
+
+    async saveProduct() {
+      if (!this.validateProductForm()) return
+      this.isSavingProduct = true
+      this.productSaveError = ''
+
+      try {
+        if (this.productModalMode === 'create') {
+          const payload = {
+            name: this.productForm.name.trim(),
+            category: this.productForm.category,
+            price: this.productForm.price ? parseFloat(this.productForm.price) : 0,
+            image_url: this.productForm.image_url ? this.productForm.image_url.trim() : null
+          }
+          const res = await apiClient.post(`/admin/stores/${this.store.id}/products`, payload)
+          if (res.data.status === 'success') {
+            this.closeProductModal()
+            await this.fetchStoreDetails()
+            globalState.triggerNotificationRefresh()
+          } else {
+            this.productSaveError = res.data.message || 'حدث خطأ أثناء حفظ الصنف'
+          }
+        } else {
+          const payload = {
+            item_name: this.productForm.name.trim(),
+            category: this.productForm.category,
+            price: this.productForm.price ? parseFloat(this.productForm.price) : 0,
+            image_url: this.productForm.image_url ? this.productForm.image_url.trim() : null
+          }
+          const res = await apiClient.put(`/admin/products/${this.activeProduct.id}`, payload)
+          if (res.data.status === 'success') {
+            this.closeProductModal()
+            await this.fetchStoreDetails()
+            globalState.triggerNotificationRefresh()
+          } else {
+            this.productSaveError = res.data.message || 'حدث خطأ أثناء تحديث الصنف'
+          }
+        }
+      } catch (err) {
+        this.productSaveError = err.response?.data?.message || 'تعذر الاتصال بالخادم لحفظ الصنف.'
+      } finally {
+        this.isSavingProduct = false
+      }
+    },
+
+    triggerProductFileInput() {
+      this.$refs.productFileInput?.click()
+    },
+
+    handleProductFileUpload(event) {
+      const file = event.target.files?.[0]
+      if (file) this.processProductFile(file)
+    },
+
+    handleProductFileDrop(event) {
+      const file = event.dataTransfer?.files?.[0]
+      if (file) this.processProductFile(file)
+    },
+
+    processProductFile(file) {
+      if (file.size > 10 * 1024 * 1024) {
+        this.productSaveError = 'حجم الصورة كبير جداً (الأقصى 10 ميجابايت).'
+        return
+      }
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const maxDim = 600
+          let width = img.width
+          let height = img.height
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width)
+              width = maxDim
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height)
+              height = maxDim
+            }
+          }
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0, width, height)
+          this.productForm.image_url = canvas.toDataURL('image/webp', 0.85)
+        }
+        img.onerror = () => {
+          this.productForm.image_url = e.target.result
+        }
+        img.src = e.target.result
+      }
+      reader.readAsDataURL(file)
+    },
+
+    removeProductFormImage() {
+      this.productForm.image_url = ''
+      if (this.$refs.productFileInput) this.$refs.productFileInput.value = ''
+    },
+
+    getItemImage(item) {
+      if (!item) return createSvgPlaceholder("", "")
+      if (item.image_url) return item.image_url
+      if (item.image) return item.image
+
+      const name = item.name || ""
+      for (const [key, url] of Object.entries(PRODUCT_THUMBNAILS)) {
+        if (name.includes(key)) return url
+      }
+      return createSvgPlaceholder(name, item.category)
+    },
+
+    handleImageError(event, item) {
+      event.target.src = createSvgPlaceholder(item?.name, item?.category)
+    },
+
 
     openEditModal() {
       this.editForm = {
@@ -776,10 +1176,6 @@ export default {
       }
     },
 
-    editProduct(product) {
-      alert('سيتم فتح نافذة تعديل المنتج ' + product.name)
-    },
-
     handleLogout() {
       localStorage.removeItem('wafar_token')
       localStorage.removeItem('wafar_user')
@@ -788,6 +1184,7 @@ export default {
   }
 }
 </script>
+
 
 <style scoped>
 /* مسار التصفح (Breadcrumb) */
@@ -1413,4 +1810,181 @@ export default {
     grid-template-columns: 1fr;
   }
 }
+
+/* ══════════════════════════════════
+   أشكال وصورة المنتج وأنماط مودال الإضافة والتعديل
+══════════════════════════════════ */
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.modal--edit-item {
+  max-width: 500px;
+}
+
+.image-upload-wrapper {
+  width: 100%;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.image-dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.image-dropzone:hover {
+  border-color: var(--wc-green-bright, #22c55e);
+  background: #f0fdf4;
+}
+
+.dropzone-icon {
+  color: #64748b;
+}
+
+.image-dropzone:hover .dropzone-icon {
+  color: var(--wc-green-bright, #22c55e);
+}
+
+.dropzone-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--wc-text-dark, #0f172a);
+}
+
+.dropzone-subtext {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.image-preview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+.image-preview-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.image-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-img-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-img-change {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.btn-img-change:hover {
+  background: #dbeafe;
+}
+
+.btn-img-remove {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.btn-img-remove:hover {
+  background: #fee2e2;
+}
+
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  padding-left: 36px;
+}
+
+.price-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.price-input {
+  padding-left: 60px !important;
+}
+
+.price-unit-addon {
+  position: absolute;
+  left: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.required-star {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.field-error {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+  display: block;
+}
+
+.form-input--error {
+  border-color: #ef4444 !important;
+}
+
+.modal__footer--balanced {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 12px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--wc-border, #e2e8f0);
+  background: #f8fafc;
+}
+
+.btn-save--full, .btn-cancel--full {
+  flex: 1;
+  justify-content: center;
+  text-align: center;
+}
 </style>
+

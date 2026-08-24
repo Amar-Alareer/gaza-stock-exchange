@@ -13,6 +13,7 @@ import AdminLogin from "../views/AdminLogin.vue";
 import AdminDashboard from "../views/AdminDashboard.vue";
 import AdminArticles from "../views/AdminArticles.vue";
 import AdminStores from "../views/AdminStores.vue";
+import AdminItems from "../views/AdminItems.vue";
 import ProfileSettings from "../views/ProfileSettings.vue";
 
 const routes = [
@@ -65,6 +66,50 @@ const routes = [
             requiresAuth: true, // 🔒 تحتاج توكن
         },
     },
+
+    // ——— صفحة 5: إدارة المنتجات ———
+    {
+        path: "/items",
+        name: "AdminItems",
+        component: AdminItems,
+        meta: {
+            title: "إدارة المنتجات",
+            requiresAuth: true, // 🔒 تحتاج توكن
+        },
+    },
+
+    // ——— صفحة 6: إدارة التصنيفات (CRUD Front-end) ———
+    {
+        path: "/categories",
+        name: "AdminCategories",
+        component: () => import("../views/AdminCategories.vue"),
+        meta: {
+            title: "إدارة التصنيفات",
+            requiresAuth: true, // 🔒 تحتاج توكن
+        },
+    },
+
+    // ——— صفحة 7: إدارة المقارنات ———
+    {
+        path: "/comparisons",
+        name: "AdminComparisons",
+        component: () => import("../views/AdminComparisons.vue"),
+        meta: {
+            title: "إدارة المقارنات",
+            requiresAuth: true, // 🔒 تحتاج توكن
+        },
+    },
+
+    // ——— صفحة 8: إدارة العملاء ———
+    {
+        path: "/customers",
+        name: "AdminCustomers",
+        component: () => import("../views/AdminCustomers.vue"),
+        meta: {
+            title: "إدارة العملاء",
+            requiresAuth: true, // 🔒 تحتاج توكن
+        },
+    },
     // ——— صفحة تفاصيل المتجر ———
     {
         path: "/stores/:id",
@@ -82,7 +127,7 @@ const routes = [
         name: "ProfileSettings",
         component: ProfileSettings,
         meta: {
-            title: "إعدادات الملف الشخصي",
+            title: "إعدادات النظام والمنصة",
             requiresAuth: true, // 🔒 تحتاج توكن
         },
     },

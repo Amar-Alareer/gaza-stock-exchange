@@ -25,12 +25,16 @@
                 <span>الرئيسية</span>
             </router-link>
 
-            <a href="#" @click.prevent class="sidebar__item">
+            <router-link
+                to="/items"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
                 <span class="sidebar__icon">
                     <PackageIcon :size="18" />
                 </span>
                 <span>المنتجات</span>
-            </a>
+            </router-link>
 
             <router-link
                 to="/stores"
@@ -43,26 +47,38 @@
                 <span>المتاجر</span>
             </router-link>
 
-            <a href="#" @click.prevent class="sidebar__item">
+            <router-link
+                to="/categories"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
+                <span class="sidebar__icon">
+                    <GridIcon :size="18" />
+                </span>
+                <span>التصنيفات</span>
+            </router-link>
+
+            <router-link
+                to="/comparisons"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
                 <span class="sidebar__icon">
                     <BarChart2Icon :size="18" />
                 </span>
                 <span>المقارنات</span>
-            </a>
+            </router-link>
 
-            <a href="#" @click.prevent class="sidebar__item">
-                <span class="sidebar__icon">
-                    <FileTextIcon :size="18" />
-                </span>
-                <span>الطلبات</span>
-            </a>
-
-            <a href="#" @click.prevent class="sidebar__item">
+            <router-link
+                to="/customers"
+                class="sidebar__item"
+                active-class="sidebar__item--active"
+            >
                 <span class="sidebar__icon">
                     <UsersIcon :size="18" />
                 </span>
                 <span>العملاء</span>
-            </a>
+            </router-link>
 
             <router-link
                 to="/profile"
@@ -96,6 +112,7 @@ import {
     Home as HomeIcon,
     Package as PackageIcon,
     Store as StoreIcon,
+    LayoutGrid as GridIcon,
     BarChart2 as BarChart2Icon,
     FileText as FileTextIcon,
     Users as UsersIcon,
@@ -110,6 +127,7 @@ export default {
         HomeIcon,
         PackageIcon,
         StoreIcon,
+        GridIcon,
         BarChart2Icon,
         FileTextIcon,
         UsersIcon,

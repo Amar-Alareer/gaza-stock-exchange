@@ -31,9 +31,9 @@
                     </button>
                 </div>
 
-                <!-- شريط البحث والفلترة والترتيب الموحد على خط واحد -->
+                <!-- شريط البحث والفلاتر الموحد (Flex space-between) -->
                 <div class="stores-filter-bar">
-                    <!-- البحث -->
+                    <!-- اليسار: شريط البحث -->
                     <div class="stores-search-wrap">
                         <SearchIcon :size="16" class="stores-search-icon" />
                         <input
@@ -46,55 +46,61 @@
                         />
                     </div>
 
-                    <!-- فلتر المحافظة (5 محافظات غزة الثابتة) -->
-                    <select
-                        v-model="selectedGovernorate"
-                        class="stores-filter-select"
-                        id="stores-region-filter"
-                    >
-                        <option value="">كل المحافظات</option>
-                        <option v-for="gov in GAZA_GOVERNORATES" :key="gov.value" :value="gov.value">
-                            {{ gov.label }}
-                        </option>
-                    </select>
+                    <!-- اليمين: الفلاتر + عدد المتاجر + أزرار العرض -->
+                    <div class="stores-filter-controls">
+                        <!-- عدد المتاجر -->
+                        <div class="stores-count-badge" v-if="!isLoading">
+                            <span>{{ filteredStores.length }}</span> متجر
+                        </div>
 
-                    <!-- خيار الترتيب -->
-                    <select
-                        v-model="sortBy"
-                        class="stores-filter-select"
-                        id="stores-sort-select"
-                    >
-                        <option value="latest">الأحدث إضافة</option>
-                        <option value="oldest">الأقدم إضافة</option>
-                        <option value="name_asc">الاسم (أ - ي)</option>
-                        <option value="name_desc">الاسم (ي - أ)</option>
-                    </select>
-
-                    <!-- تبديل العرض (Grid / List) -->
-                    <div class="view-mode-toggle">
-                        <button
-                            type="button"
-                            class="view-btn"
-                            :class="{ 'view-btn--active': viewMode === 'grid' }"
-                            @click="viewMode = 'grid'"
-                            title="عرض الكروت"
+                        <!-- فلتر المحافظة -->
+                        <select
+                            v-model="selectedGovernorate"
+                            class="stores-filter-select"
+                            id="stores-region-filter"
                         >
-                            <GridIcon :size="16" />
-                        </button>
-                        <button
-                            type="button"
-                            class="view-btn"
-                            :class="{ 'view-btn--active': viewMode === 'list' }"
-                            @click="viewMode = 'list'"
-                            title="عرض القائمة"
-                        >
-                            <ListIcon :size="16" />
-                        </button>
-                    </div>
+                            <option value="">كل المحافظات</option>
+                            <option v-for="gov in GAZA_GOVERNORATES" :key="gov.value" :value="gov.value">
+                                {{ gov.label }}
+                            </option>
+                        </select>
 
-                    <!-- عدد المتاجر -->
-                    <div class="stores-count-badge" v-if="!isLoading">
-                        <span>{{ filteredStores.length }}</span> متجر
+                        <!-- خيار الترتيب -->
+                        <select
+                            v-model="sortBy"
+                            class="stores-filter-select"
+                            id="stores-sort-select"
+                        >
+                            <option value="latest">الأحدث إضافة</option>
+                            <option value="oldest">الأقدم إضافة</option>
+                            <option value="name_asc">الاسم (أ - ي)</option>
+                            <option value="name_desc">الاسم (ي - أ)</option>
+                        </select>
+
+                        <!-- فاصل رأسي -->
+                        <div class="stores-toolbar-divider"></div>
+
+                        <!-- تبديل العرض (كروت / قائمة) -->
+                        <div class="view-mode-toggle">
+                            <button
+                                type="button"
+                                class="view-btn"
+                                :class="{ 'view-btn--active': viewMode === 'grid' }"
+                                @click="viewMode = 'grid'"
+                                title="عرض الكروت"
+                            >
+                                <GridIcon :size="16" />
+                            </button>
+                            <button
+                                type="button"
+                                class="view-btn"
+                                :class="{ 'view-btn--active': viewMode === 'list' }"
+                                @click="viewMode = 'list'"
+                                title="عرض القائمة"
+                            >
+                                <ListIcon :size="16" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1349,19 +1355,27 @@ export default {
 }
 
 /* ══════════════════════════════════
-   شريط البحث والفلترة
+   شريط البحث والفلترة (space-between)
 ══════════════════════════════════ */
 .stores-filter-bar {
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--wc-white);
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--wc-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin-bottom: 20px;
+    min-height: 60px;
 }
 
 .stores-search-wrap {
     position: relative;
-    flex: 1;
-    min-width: 220px;
+    width: 320px;
+    flex-shrink: 1;
+    min-width: 180px;
 }
 
 .stores-search-icon {
@@ -1370,76 +1384,82 @@ export default {
     top: 50%;
     transform: translateY(-50%);
     color: var(--wc-text-muted);
+    pointer-events: none;
 }
 
 .stores-search-input {
     width: 100%;
-    padding: 10px 38px 10px 14px;
+    padding: 9px 38px 9px 14px;
     border: 1.5px solid var(--wc-border);
     border-radius: 10px;
-    background: var(--wc-white);
-    font-size: 14px;
+    background: #f8fafc;
+    font-size: 13.5px;
     font-family: inherit;
     color: var(--wc-text-dark);
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, background 0.15s;
+    box-sizing: border-box;
+    direction: rtl;
 }
 
 .stores-search-input:focus {
     border-color: var(--wc-green-bright);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.10);
+}
+
+.stores-filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.stores-toolbar-divider {
+    width: 1px;
+    height: 28px;
+    background: #e2e8f0;
+    margin: 0 2px;
+    flex-shrink: 0;
 }
 
 .stores-filter-select {
-    padding: 10px 14px;
+    padding: 8px 11px;
     border: 1.5px solid var(--wc-border);
     border-radius: 10px;
-    background: var(--wc-white);
-    font-size: 14px;
+    background: #f8fafc;
+    font-size: 13px;
     font-family: inherit;
     color: var(--wc-text-dark);
     outline: none;
     cursor: pointer;
-    min-width: 160px;
-    transition: border-color 0.15s;
+    min-width: 130px;
+    transition: border-color 0.15s, background 0.15s;
+    direction: rtl;
+    white-space: nowrap;
 }
 
-.stores-filter-select:focus {
+.stores-filter-select:focus,
+.stores-filter-select:hover {
     border-color: var(--wc-green-bright);
+    background: #ffffff;
 }
 
 .stores-count-badge {
     background: var(--wc-green-light);
     color: var(--wc-green);
-    padding: 6px 14px;
+    padding: 6px 12px;
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     white-space: nowrap;
+    border: 1px solid #bbf7d0;
+    flex-shrink: 0;
 }
 
 .stores-count-badge span {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 900;
-}
-
-/* شريط الأدوات والفلترة الموحد */
-.stores-filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--wc-white);
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--wc-border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.stores-search-wrap {
-    position: relative;
-    flex: 1;
-    min-width: 220px;
 }
 
 .view-mode-toggle {
@@ -1449,6 +1469,7 @@ export default {
     padding: 3px;
     border-radius: 8px;
     border: 1px solid var(--wc-border);
+    gap: 2px;
 }
 
 .view-btn {

@@ -9,24 +9,28 @@ use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
-    public function register(Request $request){
+    public function register(Request $request)
+    {
         $request->validate([
-            'name'=>'required|string|max:255',
-            'email'=>'required|string|email|unique:users,email',
-            'password'=>'required|string|min:9|confirmed',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
             'region_id' => 'nullable|exists:regions,id',
-
+            'phone' => 'nullable|string|max:20',
         ]);
-        $user= User::create([
-          'name'=>$request->name,
-          'email'=>$request->email,
-          'password'=>Hash::make($request->password),
-        'region_id' => $request->region_id ?? null
 
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'region_id' => $request->region_id ?? null,
+            'phone' => $request->phone ?? null,
+            'role' => 'client', // تثبيت دور العميل عند التسجيل العام
         ]);
+
         return response()->json([
-            'message'=>'تم تسجيل مستخدم جديد ',
-            'user'=>$user
+            'message' => 'تم تسجيل حساب عميل جديد بنجاح',
+            'user' => $user,
         ], 201);
     }
 
@@ -49,14 +53,18 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('admin-token')->plainTextToken;
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
             'token'   => $token,
             'user'    => [
-                'name'  => $user->name,
-                'email' => $user->email,
-                'role'  => 'admin',
+                'id'       => $user->id,
+                'name'     => $user->name,
+                'username' => $user->username,
+                'email'    => $user->email,
+                'phone'    => $user->phone,
+                'role'     => $user->role ?? 'client',
+                'profile_picture_url' => $user->profile_picture_url,
             ],
             'message' => 'تم تسجيل الدخول بنجاح',
         ], 200);

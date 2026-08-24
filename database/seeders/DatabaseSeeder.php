@@ -28,5 +28,9 @@ class DatabaseSeeder extends Seeder
 
         // إدخال 20 صف دفعة واحدة في جدول items بدون حاجة لفاكتوري أو نت
         DB::table('items')->insert($data);
+        $this->call([
+            CategorySeeder::class,
+            UserSeeder::class,
+        ]);
     }
 }
