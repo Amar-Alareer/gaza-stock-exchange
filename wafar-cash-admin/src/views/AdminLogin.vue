@@ -110,6 +110,19 @@
                         </svg>
                         <span>تسجيل دخول الآدمن عبر جوجل</span>
                     </button>
+
+                    <!-- رابط للانتقال لصفحة تسجيل دخول الزوار -->
+                    <div style="text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #e5e7eb;">
+                        <small style="color: #9ca3af; font-size: 12px;">لست مسؤولاً؟</small>
+                        <br>
+                        <a
+                            href="http://127.0.0.1:8000/login"
+                            style="color: #10b981; font-size: 12.5px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;"
+                        >
+                            <span>🏠</span>
+                            الدخول كمستخدم عادي
+                        </a>
+                    </div>
                 </form>
             </div>
 

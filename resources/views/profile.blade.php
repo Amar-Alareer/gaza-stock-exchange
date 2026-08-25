@@ -196,19 +196,31 @@
   <section class="profile-header-banner">
     <img src="{{ asset('assets/imges/map.png') }}" alt="خريطة" class="hero-bg-img">
     <div class="container">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <!-- LOGOUT BUTTON -->
-        <form method="POST" action="{{ route('logout') }}">
-          @csrf
-          <button type="submit" class="btn-logout">
-            <i class="bi bi-box-arrow-right"></i> تسجيل خروج
-          </button>
-        </form>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          @if($user->role === 'admin')
+            <a href="http://localhost:5173/dashboard" class="btn-admin-portal d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 0.5rem 1.15rem; border-radius: 22px; font-weight: 800; font-size: 0.88rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.35); transition: all 0.2s;">
+              <i class="bi bi-speedometer2 fs-5"></i>
+              <span>لوحة التحكم الإدارية</span>
+            </a>
+          @endif
+          <!-- LOGOUT BUTTON -->
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="btn-logout">
+              <i class="bi bi-box-arrow-right"></i> تسجيل خروج
+            </button>
+          </form>
+        </div>
 
         <!-- USER INFO -->
         <div class="d-flex align-items-center gap-3 text-end">
           <div>
-            <h1 class="user-name mb-1">{{ $user->name }}</h1>
+            <h1 class="user-name mb-1 d-flex align-items-center justify-content-end gap-2 flex-wrap">
+              {{ $user->name }}
+              @if($user->role === 'admin')
+                <span class="badge bg-warning text-dark" style="font-size:0.72rem !important; border-radius: 8px;"><i class="bi bi-shield-fill-check"></i> مسؤول النظام</span>
+              @endif
+            </h1>
             <div class="user-location">
               <i class="bi bi-geo-alt-fill text-success me-1"></i>
               {{ $user->region ? $user->region->city_or_governorate . ' - ' . $user->region->area_name : ($user->address ?? 'قطاع غزة') }}

@@ -299,6 +299,17 @@
                 </div>
             </router-link>
 
+            <!-- زر الرجوع للموقع الرئيسي -->
+            <a
+                href="http://127.0.0.1:8000"
+                target="_blank"
+                title="الموقع الرئيسي"
+                style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--wc-border); border-radius: 8px; background: var(--wc-gray-bg); color: #10b981; font-weight: 700; font-size: 13px; text-decoration: none; transition: all 0.2s;"
+            >
+                <HomeIcon :size="15" />
+                <span>الموقع الرئيسي</span>
+            </a>
+
             <!-- زر تسجيل الخروج -->
             <button
                 class="admin-header__logout"
@@ -325,6 +336,7 @@ import {
     AlertCircle as ComplaintIcon,
     CheckCheck as CheckCheckIcon,
     RotateCw as RotateCwIcon,
+    Home as HomeIcon,
 } from "@lucide/vue";
 import { globalState } from "../state.js";
 
@@ -340,6 +352,7 @@ export default {
         ComplaintIcon,
         CheckCheckIcon,
         RotateCwIcon,
+        HomeIcon,
     },
     data() {
         return {
