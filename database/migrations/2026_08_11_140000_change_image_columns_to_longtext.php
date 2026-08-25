@@ -7,13 +7,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE categories MODIFY image LONGTEXT NULL");
-        DB::statement("ALTER TABLE items MODIFY image_url LONGTEXT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE categories MODIFY image LONGTEXT NULL");
+            DB::statement("ALTER TABLE items MODIFY image_url LONGTEXT NULL");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE categories MODIFY image VARCHAR(255) NULL");
-        DB::statement("ALTER TABLE items MODIFY image_url VARCHAR(255) NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE categories MODIFY image VARCHAR(255) NULL");
+            DB::statement("ALTER TABLE items MODIFY image_url VARCHAR(255) NULL");
+        }
     }
 };

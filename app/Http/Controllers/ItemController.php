@@ -42,6 +42,8 @@ class ItemController extends Controller
             'name'        => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
             'category'    => 'nullable|string',
+            'image_url'   => 'nullable|string',
+            'min_price'   => 'nullable|numeric|min:0',
         ]);
 
         $categoryId = $request->category_id;
@@ -82,6 +84,8 @@ class ItemController extends Controller
             'name'        => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
             'category'    => 'nullable|string',
+            'image_url'   => 'nullable|string',
+            'min_price'   => 'nullable|numeric|min:0',
         ]);
 
         $categoryId = $request->category_id ?: $item->category_id;

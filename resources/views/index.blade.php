@@ -7,7 +7,8 @@
   <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=8') }}">
   <link rel="icon" type="image/png" href="{{ asset('assets/imges/logo.png') }}">
 </head>
 <body>
@@ -38,50 +39,91 @@
 
         <!-- CONTROLS (LEFT IN RTL) -->
         <div class="d-none d-lg-flex align-items-center gap-3 order-3">
-          <div class="search-pill">
-            <input type="text" placeholder="طحين ، سكر">
-            <button type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          <form action="{{ route('prices') }}" method="GET" class="search-pill m-0">
+            <input type="text" name="search" placeholder="طحين ، سكر">
+            <button type="submit">
+              <i class="bi bi-search"></i>
             </button>
-          </div>
+          </form>
 
           <a href="{{ route('compare') }}" class="btn-compare">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+            <i class="bi bi-arrow-left-right"></i>
             مقارنة الاسعار
           </a>
-          <a href="{{ route('profile') }}" class="icon-circle" title="الملف الشخصي">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-          </a>
+
+          @if(Auth::check())
+            <a href="{{ route('profile') }}" class="d-flex align-items-center text-decoration-none" title="الملف الشخصي">
+              <img src="{{ Auth::user()->profile_picture_url }}" alt="{{ Auth::user()->name }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-green);">
+            </a>
+          @else
+            <div class="d-flex align-items-center gap-2">
+              <a href="{{ route('login') }}" class="btn-nav-login">
+                <i class="bi bi-box-arrow-in-left"></i> دخول
+              </a>
+              <a href="{{ route('signup') }}" class="btn-nav-signup">
+                <i class="bi bi-person-plus"></i> حساب جديد
+              </a>
+            </div>
+          @endif
         </div>
 
         <!-- MOBILE CONTROLS -->
         <div class="d-flex d-lg-none align-items-center gap-2 order-3">
-          <a href="{{ route('profile') }}" class="icon-circle">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-          </a>
-          <button class="navbar-toggler-custom">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          @if(Auth::check())
+            <a href="{{ route('profile') }}" class="d-flex align-items-center text-decoration-none">
+              <img src="{{ Auth::user()->profile_picture_url }}" alt="{{ Auth::user()->name }}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-green);">
+            </a>
+          @else
+            <a href="{{ route('login') }}" class="btn-nav-login py-1 px-2" style="font-size:0.8rem;">
+              دخول
+            </a>
+          @endif
+          <button class="navbar-toggler-custom" type="button" aria-label="القائمة">
+            <i class="bi bi-list fs-4"></i>
           </button>
         </div>
       </div>
 
       <!-- MOBILE SECONDARY ROW -->
       <div class="d-flex d-lg-none align-items-center gap-2 mt-2">
-        <div class="search-pill flex-grow-1">
-          <input type="text" placeholder="طحين ، سكر">
-          <button type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
-        </div>
-        <a href="{{ route('compare') }}" class="btn-compare">مقارنة الاسعار 🪙</a>
+        <form action="{{ route('prices') }}" method="GET" class="search-pill flex-grow-1 m-0">
+          <input type="text" name="search" placeholder="طحين ، سكر">
+          <button type="submit"><i class="bi bi-search"></i></button>
+        </form>
+        <a href="{{ route('compare') }}" class="btn-compare"><i class="bi bi-arrow-left-right me-1"></i> مقارنة</a>
       </div>
     </div>
 
     <div class="mobile-nav-panel">
-      <a class="nav-link active" href="{{ route('index') }}">الرئيسية</a>
-      <a class="nav-link" href="{{ route('map') }}">الخريطة</a>
-      <a class="nav-link" href="{{ route('shops') }}">المحلات</a>
-      <a class="nav-link" href="{{ route('prices') }}">الاسعار</a>
+      <a class="nav-link active" href="{{ route('index') }}">
+        <i class="bi bi-house-door-fill"></i> الرئيسية
+      </a>
+      <a class="nav-link" href="{{ route('map') }}">
+        <i class="bi bi-map-fill"></i> الخريطة التفاعلية
+      </a>
+      <a class="nav-link" href="{{ route('shops') }}">
+        <i class="bi bi-shop"></i> دليل المحلات
+      </a>
+      <a class="nav-link" href="{{ route('prices') }}">
+        <i class="bi bi-tag-fill"></i> قائمة الأسعار
+      </a>
+      <a class="nav-link" href="{{ route('compare') }}">
+        <i class="bi bi-arrow-left-right"></i> مقارنة الأسعار
+      </a>
+      @if(Auth::check())
+        <a class="nav-link" href="{{ route('profile') }}">
+          <i class="bi bi-person-circle"></i> الملف الشخصي
+        </a>
+      @else
+        <div class="mobile-nav-auth-card d-flex flex-column gap-2 mt-auto">
+          <a href="{{ route('login') }}" class="btn btn-outline-light w-100 rounded-pill fw-bold py-2">
+            <i class="bi bi-box-arrow-in-left me-1"></i> تسجيل دخول
+          </a>
+          <a href="{{ route('signup') }}" class="btn btn-success w-100 rounded-pill fw-bold py-2" style="background:#24df64;color:#0b2516;border:none;">
+            <i class="bi bi-person-plus-fill me-1"></i> إنشاء حساب جديد
+          </a>
+        </div>
+      @endif
     </div>
   </nav>
 
@@ -109,10 +151,10 @@
       <div class="from-line">من <span class="brand-highlight">وفر<span class="white-part">كاش</span></span></div>
       <h1 class="hero-title">اعرف اسعار السوق<br>حسب منطقتك</h1>
 
-      <button class="btn-locate">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-        حدد موقعك
-      </button>
+      <a href="{{ route('map') }}" class="btn-locate text-decoration-none d-inline-flex align-items-center gap-2">
+        <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
+        حدد موقعك على الخريطة
+      </a>
     </div>
   </section>
 
@@ -124,7 +166,7 @@
       <section class="mb-5">
         <div class="section-title">
           <span class="bar"></span>
-          <h2>الأكثر طلباً</h2>
+          <h2><i class="bi bi-fire text-danger me-1"></i> الأكثر طلباً</h2>
         </div>
 
         <!-- TABLE VIEW (DESKTOP & TABLET) -->
@@ -141,16 +183,22 @@
             </thead>
             <tbody id="products-table-body">
               @forelse($products as $product)
+                @php
+                  $bestPrice = $product->best_price;
+                  $bestStore = $product->best_store;
+                  $categoryName = $product->category_name;
+                  $timeAgo = $product->formatted_updated_at;
+                @endphp
                 <tr onclick="window.location='{{ route('products.show', $product->id) }}'" style="cursor: pointer;">
-                  <td><div class="cell-card item-name">{{ $product->name }}</div></td>
-                  <td><div class="cell-card price-tag">{{ $product->price }} شيكل</div></td>
-                  <td><div class="cell-card">{{ $product->unit }}</div></td>
-                  <td><div class="cell-card">{{ $product->store_name }}</div></td>
-                  <td><div class="cell-card updated">{{ $product->updated_at->locale('ar')->diffForHumans() }}</div></td>
+                  <td><div class="cell-card item-name"><i class="bi bi-box-seam me-1 text-success"></i> {{ $product->name }}</div></td>
+                  <td><div class="cell-card price-tag">{{ $bestPrice ? $bestPrice . ' شيكل' : 'غير محدد' }}</div></td>
+                  <td><div class="cell-card"><span class="badge bg-light text-dark"><i class="bi bi-tag-fill text-success me-1"></i> {{ $categoryName }}</span></div></td>
+                  <td><div class="cell-card"><i class="bi bi-shop me-1 text-muted"></i> {{ $bestStore }}</div></td>
+                  <td><div class="cell-card updated"><i class="bi bi-clock me-1"></i> {{ $timeAgo }}</div></td>
                 </tr>
               @empty
                 <tr>
-                  <td colspan="5" class="text-center py-4">لا توجد بيانات متاحة حالياً</td>
+                  <td colspan="5" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-3 d-block mb-2"></i> لا توجد منتجات مسجلة حالياً في قاعدة البيانات</td>
                 </tr>
               @endforelse
             </tbody>
@@ -158,76 +206,80 @@
         </div>
 
         <!-- MOBILE LIST VIEW -->
-        <div class="simple-list d-sm-none mb-3" id="products-mobile-list">
-          <div class="row g-0"><div class="col-6 list-head">السلعة</div><div class="col-6 list-head">السعر</div></div>
+        <div class="mobile-products-list d-sm-none mb-3" id="products-mobile-list">
+          <div class="mobile-list-header">
+            <div class="header-col item-col">السلعة</div>
+            <div class="header-col price-col">السعر</div>
+          </div>
           @foreach($products as $product)
-            <div class="row g-0" onclick="window.location='{{ route('products.show', $product->id) }}'" style="cursor: pointer;">
-              <div class="col-6 list-row">{{ $product->name }}</div>
-              <div class="col-6 list-row">{{ $product->price }} شيكل</div>
+            @php
+              $bestPrice = $product->best_price;
+            @endphp
+            <div class="mobile-item-row" onclick="window.location='{{ route('products.show', $product->id) }}'">
+              <div class="item-name-cell">
+                <i class="bi bi-box-seam text-success"></i>
+                <span>{{ $product->name }}</span>
+              </div>
+              <div class="item-price-cell">
+                <span class="price-val">{{ $bestPrice ? $bestPrice . ' شيكل' : 'غير محدد' }}</span>
+              </div>
             </div>
           @endforeach
         </div>
 
-        <button id="load-more-btn" class="btn-more d-inline-block text-center text-decoration-none border-0 bg-transparent cursor-pointer">المزيد....</button>
+        <button id="load-more-btn" class="btn-more d-inline-block text-center text-decoration-none border-0 bg-transparent cursor-pointer">
+          <i class="bi bi-plus-circle me-1"></i> المزيد....
+        </button>
       </section>
 
       <!-- BROWSE CATEGORIES SECTION -->
       <section class="pb-5">
         <div class="section-title">
           <span class="bar"></span>
-          <h2>تصفح الأقسام</h2>
+          <h2><i class="bi bi-grid-fill text-success me-1"></i> تصفح الأقسام</h2>
         </div>
 
-        <div class="row g-4 pt-3">
-          <div class="col-6 col-md-3">
-            <div class="category-card">
-              <div class="category-icon-wrapper">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2c-1.5 2.5-3 5-3 8 0 3.5 2 6 3 9 1-3 3-5.5 3-9 0-3-1.5-5.5-3-8zm0 13c-1.1 0-2-1.3-2-3s.9-3 2-3 2 1.3 2 3-.9 3-2 3z"/>
-                  <path d="M6 6c-1 2-2 4-2 6 0 3 1.5 5 3 7 1-2 2-4 2-6 0-2-1-4-3-7z" opacity="0.85"/>
-                  <path d="M18 6c1 2 2 4 2 6 0 3-1.5 5-3 7-1-2-2-4-2-6 0-2 1-4 3-7z" opacity="0.85"/>
-                </svg>
-              </div>
-              <div class="cat-name">مواد غذائية</div>
-              <div class="cat-count">235 صنف</div>
-            </div>
-          </div>
+        @php
+          $catPalettes = [
+            ['icon_bg'=>'#fef3c7','accent'=>'#d97706','gradient'=>'linear-gradient(135deg,#fef3c7 0%,#fffbeb 100%)','icon'=>'bi-cart3'],
+            ['icon_bg'=>'#d1fae5','accent'=>'#059669','gradient'=>'linear-gradient(135deg,#d1fae5 0%,#f0fdf4 100%)','icon'=>'bi-basket'],
+            ['icon_bg'=>'#fee2e2','accent'=>'#dc2626','gradient'=>'linear-gradient(135deg,#fee2e2 0%,#fff5f5 100%)','icon'=>'bi-egg-fried'],
+            ['icon_bg'=>'#ede9fe','accent'=>'#7c3aed','gradient'=>'linear-gradient(135deg,#ede9fe 0%,#f5f3ff 100%)','icon'=>'bi-fuel-pump'],
+            ['icon_bg'=>'#dbeafe','accent'=>'#2563eb','gradient'=>'linear-gradient(135deg,#dbeafe 0%,#eff6ff 100%)','icon'=>'bi-droplet'],
+            ['icon_bg'=>'#fce7f3','accent'=>'#db2777','gradient'=>'linear-gradient(135deg,#fce7f3 0%,#fff0f8 100%)','icon'=>'bi-cup-hot'],
+            ['icon_bg'=>'#e0f2fe','accent'=>'#0284c7','gradient'=>'linear-gradient(135deg,#e0f2fe 0%,#f0f9ff 100%)','icon'=>'bi-flower1'],
+            ['icon_bg'=>'#dcfce7','accent'=>'#16a34a','gradient'=>'linear-gradient(135deg,#dcfce7 0%,#f0fdf4 100%)','icon'=>'bi-box-seam'],
+          ];
+        @endphp
 
-          <div class="col-6 col-md-3">
-            <div class="category-card">
-              <div class="category-icon-wrapper">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2c.6 0 1.2.3 1.5.8.5-.2 1.1 0 1.4.4.4.4.5 1 .2 1.5C17.5 5.8 19 8 19 11c0 4.2-3.1 7.5-7 7.5S5 15.2 5 11c0-3 1.5-5.2 3.9-6.3-.3-.5-.2-1.1.2-1.5.3-.4.9-.6 1.4-.4.3-.5.9-.8 1.5-.8z"/>
-                </svg>
+        <div class="categories-grid pt-3">
+          @forelse($categories as $i => $category)
+            @php
+              $palette = $catPalettes[$i % count($catPalettes)];
+            @endphp
+            <a href="{{ route('prices') }}?category={{ urlencode($category->name) }}"
+               class="cat-pill"
+               style="--pill-icon-bg:{{ $palette['icon_bg'] }};--pill-accent:{{ $palette['accent'] }};--pill-gradient:{{ $palette['gradient'] }}">
+              <div class="cat-pill-icon" style="color: {{ $palette['accent'] }}; font-size: 1.4rem;">
+                @if($category->image && (str_starts_with($category->image, 'http') || str_starts_with($category->image, 'data:image')))
+                  <img src="{{ $category->image }}" alt="{{ $category->name }}">
+                @elseif($category->image && file_exists(public_path('storage/'.$category->image)))
+                  <img src="{{ asset('storage/'.$category->image) }}" alt="{{ $category->name }}">
+                @else
+                  <i class="bi {{ $palette['icon'] }}"></i>
+                @endif
               </div>
-              <div class="cat-name">خضراوات</div>
-              <div class="cat-count">235 صنف</div>
-            </div>
-          </div>
-
-          <div class="col-6 col-md-3">
-            <div class="category-card">
-              <div class="category-icon-wrapper">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.5 4.5c-2-2-5.3-2-7.3 0L4.5 10.2c-2 2-2 5.3 0 7.3l1.8 1.8c2 2 5.3 2 7.3 0l5.7-5.7c2-2 2-5.3 0-7.3l-1.8-1.8zM11 15c-1.4 0-2.5-1.1-2.5-2.5S9.6 10 11 10s2.5 1.1 2.5 2.5S12.4 15 11 15z"/>
-                </svg>
+              <div class="cat-pill-body">
+                <div class="cat-pill-name">{{ $category->name }}</div>
+                <div class="cat-pill-count">{{ $category->items_count }} صنف</div>
               </div>
-              <div class="cat-name">لحوم</div>
-              <div class="cat-count">235 صنف</div>
-            </div>
-          </div>
-
-          <div class="col-6 col-md-3">
-            <div class="category-card">
-              <div class="category-icon-wrapper">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 8.5c0-.8-.5-1.5-1.2-1.8L15.7 4.6l-1.4 1.4 1.5 1.5C15.3 7.8 15 8.4 15 9c0 1.7 1.3 3 3 3h.5v4.5c0 1.1-.9 2-2 2s-2-.9-2-2V11c0-1.7-1.3-3-3-3H11V4c0-.6-.4-1-1-1H5c-.6 0-1 .4-1 1v16c0 .6.4 1 1 1h5c.6 0 1-.4 1-1v-7h1c.6 0 1 .4 1 1v4.5c0 2.2 1.8 4 4 4s4-1.8 4-4V11c.6 0 1.1-.2 1.5-.6.6-.7.5-1.9-.5-1.9zM9 11H6V6h3v5z"/>
-                </svg>
+              <div class="cat-pill-arrow">
+                <i class="bi bi-chevron-left"></i>
               </div>
-              <div class="cat-name">وقود</div>
-              <div class="cat-count">235 صنف</div>
-            </div>
-          </div>
+            </a>
+          @empty
+            <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem;">لا توجد أقسام مسجلة حالياً</div>
+          @endforelse
         </div>
       </section>
 
@@ -252,51 +304,65 @@
   </footer>
 
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset('assets/js/script.js') }}"></script>
+  <script src="{{ asset('assets/js/script.js?v=8') }}"></script>
   <script>
     let offset = 5;
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const tableBody = document.getElementById('products-table-body');
+    const mobileList = document.getElementById('products-mobile-list');
 
-    document.getElementById('load-more-btn').addEventListener('click', function() {
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', function() {
+        loadMoreBtn.innerText = 'جاري التحميل...';
+        loadMoreBtn.disabled = true;
+
         fetch(`{{ route('products.loadMore') }}?offset=${offset}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length === 0) {
-                    this.innerText = 'لا يوجد المزيد من المنتجات';
-                    this.disabled = true;
-                    return;
-                }
+          .then(response => response.json())
+          .then(data => {
+            if (data.length > 0) {
+              data.forEach(product => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => window.location = product.detail_url;
+                tr.style.cursor = 'pointer';
+                tr.innerHTML = `
+                  <td><div class="cell-card item-name"><i class="bi bi-box-seam me-1 text-success"></i> ${product.name}</div></td>
+                  <td><div class="cell-card price-tag">${product.display_price}</div></td>
+                  <td><div class="cell-card"><span class="badge bg-light text-dark"><i class="bi bi-tag-fill text-success me-1"></i> ${product.display_category || '-'}</span></div></td>
+                  <td><div class="cell-card"><i class="bi bi-shop me-1 text-muted"></i> ${product.display_store || '-'}</div></td>
+                  <td><div class="cell-card updated"><i class="bi bi-clock me-1"></i> ${product.formatted_updated_at}</div></td>
+                `;
+                tableBody.appendChild(tr);
 
-                const tableBody = document.getElementById('products-table-body');
-                const mobileList = document.getElementById('products-mobile-list');
+                const mobDiv = document.createElement('div');
+                mobDiv.className = 'mobile-item-row';
+                mobDiv.onclick = () => window.location = product.detail_url;
+                mobDiv.innerHTML = `
+                  <div class="item-name-cell">
+                    <i class="bi bi-box-seam text-success"></i>
+                    <span>${product.name}</span>
+                  </div>
+                  <div class="item-price-cell">
+                    <span class="price-val">${product.display_price}</span>
+                  </div>
+                `;
+                mobileList.appendChild(mobDiv);
+              });
 
-                data.forEach(product => {
-                    const tr = document.createElement('tr');
-                    tr.style.cursor = 'pointer';
-                    tr.onclick = () => window.location.href = product.detail_url;
-                    tr.innerHTML = `
-                        <td><div class="cell-card item-name">${product.name}</div></td>
-                        <td><div class="cell-card price-tag">${product.price} شيكل</div></td>
-                        <td><div class="cell-card">${product.unit ?? ''}</div></td>
-                        <td><div class="cell-card">${product.store_name ?? ''}</div></td>
-                        <td><div class="cell-card updated">${product.formatted_updated_at}</div></td>
-                    `;
-                    tableBody.appendChild(tr);
-
-                    const mobileRow = document.createElement('div');
-                    mobileRow.className = 'row g-0';
-                    mobileRow.style.cursor = 'pointer';
-                    mobileRow.onclick = () => window.location.href = product.detail_url;
-                    mobileRow.innerHTML = `
-                        <div class="col-6 list-row">${product.name}</div>
-                        <div class="col-6 list-row">${product.price} شيكل</div>
-                    `;
-                    mobileList.appendChild(mobileRow);
-                });
-
-                offset += 5;
-            })
-            .catch(error => console.error('Error:', error));
-    });
+              offset += data.length;
+              loadMoreBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> المزيد....';
+              loadMoreBtn.disabled = false;
+            } else {
+              loadMoreBtn.innerText = 'لا توجد منتجات إضافية';
+              loadMoreBtn.disabled = true;
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            loadMoreBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> المزيد....';
+            loadMoreBtn.disabled = false;
+          });
+      });
+    }
   </script>
 </body>
 </html>

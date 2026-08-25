@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\StoreController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AutomationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ItemController;
 use Illuminate\Http\Request;
@@ -16,6 +17,9 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::get('/articles', [ArticleController::class, 'index']);
 Route::get('/articles/{id}', [ArticleController::class, 'show']);
+
+// مسار جلب الأسعار التلقائي عبر n8n للذكاء الاصطناعي
+Route::get('/stores/get-face-prices/{id}', [AutomationController::class, 'getFacePrices']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Auth & Profile management

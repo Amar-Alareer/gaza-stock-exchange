@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Item;
+use App\Models\Price;
 use App\Models\Region;
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -209,7 +211,7 @@ class StoreController extends Controller
 
         $regions = Region::orderBy('area_name')->get(['id', 'city_or_governorate', 'area_name']);
 
-        $all_categories = Item::distinct()->pluck('category')->filter()->values();
+        $all_categories = Category::pluck('name')->merge(Item::distinct()->pluck('category'))->filter()->unique()->values();
 
         return response()->json([
             'status' => 'success',

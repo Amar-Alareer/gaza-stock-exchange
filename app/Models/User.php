@@ -22,6 +22,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'profile_picture',
+        'google_id',
     ];
 
     protected $hidden = [
@@ -33,13 +34,16 @@ class User extends Authenticatable
 
     public function getProfilePictureUrlAttribute()
     {
-        if ($this->profile_picture) {
-            return asset('storage/'.$this->profile_picture);
+        if (!empty($this->profile_picture)) {
+            if (str_starts_with($this->profile_picture, 'http')) {
+                return $this->profile_picture;
+            }
+            return asset('storage/' . $this->profile_picture);
         }
 
-        $name = urlencode($this->name ?? 'User');
+        $initials = urlencode(mb_substr($this->name ?? 'م', 0, 2));
 
-        return "https://api.dicebear.com/7.x/initials/svg?seed={$name}&backgroundColor=17692e";
+        return "https://ui-avatars.com/api/?name={$initials}&background=17692e&color=ffffff&size=200&rounded=true&bold=true";
     }
 
     public function region()
