@@ -20,14 +20,23 @@
       padding: 40px 0 80px;
       overflow: hidden;
     }
+    .profile-header-banner > .container > div {
+      justify-content: space-between !important;
+      align-items: center !important;
+    }
     .profile-header-banner .hero-bg-img {
       position: absolute; inset: 0; width: 100%; height: 100%;
       object-fit: cover; opacity: 0.08;
     }
     .user-avatar {
-      width: 80px !important; height: 80px !important; border-radius: 50% !important;
-      object-fit: cover !important; border: 3px solid #24df64; display: inline-block !important;
+      width: 140px !important; height: 140px !important; border-radius: 50% !important;
+      object-fit: cover !important; border: 4px solid #24df64; display: inline-block !important;
       aspect-ratio: 1 / 1 !important; flex-shrink: 0;
+    }
+    .avatar-preview-img {
+      width: 96px !important; height: 96px !important; border-radius: 50% !important;
+      object-fit: cover !important; border: 3px solid #17692e; display: inline-block !important;
+      aspect-ratio: 1 / 1 !important;
     }
     .avatar-preview-img {
       width: 96px !important; height: 96px !important; border-radius: 50% !important;
@@ -193,29 +202,19 @@
   {{-- ====== LOGGED IN VIEW ====== --}}
 
   <!-- PROFILE HEADER BANNER -->
+ <!-- PROFILE HEADER BANNER -->
   <section class="profile-header-banner">
     <img src="{{ asset('assets/imges/map.png') }}" alt="خريطة" class="hero-bg-img">
     <div class="container">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          @if($user->role === 'admin')
-            <a href="http://localhost:5173/dashboard" class="btn-admin-portal d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 0.5rem 1.15rem; border-radius: 22px; font-weight: 800; font-size: 0.88rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.35); transition: all 0.2s;">
-              <i class="bi bi-speedometer2 fs-5"></i>
-              <span>لوحة التحكم الإدارية</span>
-            </a>
-          @endif
-          <!-- LOGOUT BUTTON -->
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="btn-logout">
-              <i class="bi bi-box-arrow-right"></i> تسجيل خروج
-            </button>
-          </form>
-        </div>
-
-        <!-- USER INFO -->
+      <div class="d-flex align-items-center justify-content-between w-100 flex-wrap gap-3">
+        
+        <!-- USER INFO (Right Side) -->
         <div class="d-flex align-items-center gap-3 text-end">
+          <div class="avatar-wrapper">
+            <img src="{{ $user->profile_picture_url }}" alt="{{ $user->name }}" class="user-avatar">
+          </div>
           <div>
-            <h1 class="user-name mb-1 d-flex align-items-center justify-content-end gap-2 flex-wrap">
+            <h1 class="user-name mb-1 d-flex align-items-center gap-2 flex-wrap">
               {{ $user->name }}
               @if($user->role === 'admin')
                 <span class="badge bg-warning text-dark" style="font-size:0.72rem !important; border-radius: 8px;"><i class="bi bi-shield-fill-check"></i> مسؤول النظام</span>
@@ -232,14 +231,28 @@
               @endif
             </div>
           </div>
-          <div class="avatar-wrapper">
-            <img src="{{ $user->profile_picture_url }}" alt="{{ $user->name }}" class="user-avatar">
-          </div>
         </div>
+
+        <!-- BUTTONS (Left Side) -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          @if($user->role === 'admin')
+            <a href="http://localhost:5173/dashboard" class="btn-admin-portal d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 0.5rem 1.15rem; border-radius: 22px; font-weight: 800; font-size: 0.88rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.35); transition: all 0.2s;">
+              <i class="bi bi-speedometer2 fs-5"></i>
+              <span>لوحة التحكم الإدارية</span>
+            </a>
+          @endif
+          <!-- LOGOUT BUTTON -->
+          <form method="POST" action="{{ route('logout') }}" class="m-0">
+            @csrf
+            <button type="submit" class="btn-logout">
+              <i class="bi bi-box-arrow-right"></i> تسجيل خروج
+            </button>
+          </form>
+        </div>
+
       </div>
     </div>
   </section>
-
   <!-- MAIN BODY -->
   <main class="page-body pt-0">
     <div class="container">
@@ -346,10 +359,10 @@
 
                   <div class="category-badge"><i class="bi {{ $catIcon }}"></i></div>
                   <div class="product-img-wrap">
-                    @if($item->image_url && str_starts_with($item->image_url, 'http'))
-                      <img src="{{ $item->image_url }}" alt="{{ $item->name }}" class="product-img"
+                    @if($item->formatted_image_url)
+                      <img src="{{ $item->formatted_image_url }}" alt="{{ $item->name }}" class="product-img"
                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                      <div style="display:none;font-size:2.5rem;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
+                      <div style="display:none;font-size:3rem;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
                     @else
                       <div style="font-size:3rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
                     @endif
@@ -386,7 +399,7 @@
           <div class="row g-4 pb-4">
             @foreach($favoriteStores as $store)
               @php
-                $storeImg   = $store->image ? (str_starts_with($store->image,'http') ? $store->image : asset('storage/'.$store->image)) : asset('assets/imges/shops.png');
+                $storeImg   = $store->image_url ?: asset('assets/imges/shops.png');
                 $regionName = $store->region ? $store->region->city_or_governorate . ' - ' . $store->region->area_name : ($store->address ?? 'قطاع غزة');
               @endphp
               <div class="col-12 col-md-6 col-lg-4">
@@ -577,21 +590,7 @@
   @endif
 
   <!-- FOOTER -->
-  <footer class="main-footer">
-    <div class="container text-center">
-      <div class="footer-logo d-flex align-items-center justify-content-center gap-2">
-        <img src="{{asset('assets/imges/logo.png')}}" alt="وفر كاش" class="footer-logo-img">
-        <span class="footer-logo-text"><span class="brand-green">وفر</span><span class="brand-white">كاش</span></span>
-      </div>
-      <div class="footer-tagline">منصة لمتابعة أسعار السوق في منطقتك</div>
-      <div class="footer-links d-flex justify-content-center gap-4">
-        <a href="#">سياسة الخصوصية</a>
-        <a href="#">الشروط والاحكام</a>
-        <a href="#">تواصل معنا</a>
-      </div>
-      <div class="copyright">© 2026 وفر كاش، جميع الحقوق محفوظة</div>
-    </div>
-  </footer>
+  @include('partials.footer')
 
   <script src="{{asset('assets/js/bootstrap.bundle.min.js')}}"></script>
   <script src="{{asset('assets/js/script.js?v=8')}}"></script>

@@ -236,49 +236,100 @@
       <section class="pb-5">
         <div class="section-title">
           <span class="bar"></span>
-          <h2><i class="bi bi-grid-fill text-success me-1"></i> تصفح الأقسام</h2>
+          <h2>تصفح الأقسام</h2>
         </div>
 
         @php
-          $catPalettes = [
-            ['icon_bg'=>'#fef3c7','accent'=>'#d97706','gradient'=>'linear-gradient(135deg,#fef3c7 0%,#fffbeb 100%)','icon'=>'bi-cart3'],
-            ['icon_bg'=>'#d1fae5','accent'=>'#059669','gradient'=>'linear-gradient(135deg,#d1fae5 0%,#f0fdf4 100%)','icon'=>'bi-basket'],
-            ['icon_bg'=>'#fee2e2','accent'=>'#dc2626','gradient'=>'linear-gradient(135deg,#fee2e2 0%,#fff5f5 100%)','icon'=>'bi-egg-fried'],
-            ['icon_bg'=>'#ede9fe','accent'=>'#7c3aed','gradient'=>'linear-gradient(135deg,#ede9fe 0%,#f5f3ff 100%)','icon'=>'bi-fuel-pump'],
-            ['icon_bg'=>'#dbeafe','accent'=>'#2563eb','gradient'=>'linear-gradient(135deg,#dbeafe 0%,#eff6ff 100%)','icon'=>'bi-droplet'],
-            ['icon_bg'=>'#fce7f3','accent'=>'#db2777','gradient'=>'linear-gradient(135deg,#fce7f3 0%,#fff0f8 100%)','icon'=>'bi-cup-hot'],
-            ['icon_bg'=>'#e0f2fe','accent'=>'#0284c7','gradient'=>'linear-gradient(135deg,#e0f2fe 0%,#f0f9ff 100%)','icon'=>'bi-flower1'],
-            ['icon_bg'=>'#dcfce7','accent'=>'#16a34a','gradient'=>'linear-gradient(135deg,#dcfce7 0%,#f0fdf4 100%)','icon'=>'bi-box-seam'],
-          ];
+          $getCatIconSvg = function($name) {
+            $name = trim($name);
+            // مواد غذائية / حبوب
+            if (str_contains($name, 'غذائي') || str_contains($name, 'حبوب') || str_contains($name, 'طحين') || str_contains($name, 'أرز') || str_contains($name, 'تموين')) {
+              return '<svg viewBox="0 0 24 24"><path d="M6.05 8.05c-2.73 2.73-2.73 7.15 0 9.88s7.15 2.73 9.88 0c.2-.2.38-.41.56-.63L14.7 15.5c-.88.88-2.3 2.07-4.46 1.7-1.46-.25-2.65-1.44-2.9-2.9-.37-2.16.82-3.58 1.7-4.46l-1.8-1.79c-.42.36-.82.7-1.19 1zm12.39-4.54c-1.4.15-2.71.74-3.74 1.77l-1.8 1.79c1.03 1.03 2.7 1.03 3.74 0 1.03-1.03 1.03-2.7 0-3.74-.07-.07-.13-.13-.2-.19v.37zm-6.19 6.2c-.52.51-.95 1.09-1.29 1.71.62-.34 1.2-.77 1.71-1.29l1.79-1.8c-.52-.51-.95-1.09-1.29-1.71-.62.34-1.2.77-1.71 1.29l-1.79 1.8c1.03 1.03 2.7 1.03 3.74 0l-1.16-1zm2.39-2.39c.52-.51.95-1.09 1.29-1.71-.62.34-1.2.77-1.71 1.29l-1.79 1.8c.52.51.95 1.09 1.29 1.71.62-.34 1.2-.77 1.71-1.29l1.79-1.8c-.87-.88-2.3-2.07-4.46-1.7-1.46.25-2.65 1.44-2.9 2.9-.37 2.16.82 3.58 1.7 4.46l1.79-1.8c1.03-1.03 2.7-1.03 3.74 0 1.03 1.03 1.03 2.7 0 3.74-.2.2-.41.38-.63.56l1.8 1.79c2.73-2.73 2.73-7.15 0-9.88-1.03-1.03-2.34-1.62-3.74-1.77v.01z"/></svg>';
+            }
+            // خضراوات
+            if (str_contains($name, 'خضار') || str_contains($name, 'خضراوات') || str_contains($name, 'طماطم')) {
+              return '<svg viewBox="0 0 24 24"><path d="M12 5.5c-4.42 0-8 3.36-8 7.5 0 4.14 3.58 7.5 8 7.5s8-3.36 8-7.5c0-4.14-3.58-7.5-8-7.5zm.5-2.75c-.28 0-.5.22-.5.5v1.28c-1.42-.16-2.58-.69-3.21-1.47-.18-.23-.52-.27-.75-.08-.23.18-.27.52-.08.75 1.04 1.28 2.89 1.87 4.54 1.99v.08c1.65-.12 3.5-.71 4.54-1.99.19-.23.15-.57-.08-.75-.23-.19-.57-.15-.75.08-.63.78-1.79 1.31-3.21 1.47V3.25c0-.28-.22-.5-.5-.5z"/></svg>';
+            }
+            // لحوم ودواجن
+            if (str_contains($name, 'لحم') || str_contains($name, 'لحوم') || str_contains($name, 'دواجن') || str_contains($name, 'دجاج')) {
+              return '<svg viewBox="0 0 24 24"><path d="M17.5 4C14.5 4 13 5.5 11 6.5 9 5.5 7.5 4 4.5 4 2 4 1 6.5 1 9.5c0 4.5 5 10.5 11 10.5s11-6 11-10.5c0-3-1-5.5-5.5-5.5zm-5.5 13c-4.2 0-7.5-4.2-7.5-7.5 0-1.8.8-3 2.5-3 1.5 0 2.5 1 4 2 1-.7 2-1.5 3.5-1.5 1.7 0 2.5 1.2 2.5 3 0 3.3-3.3 7-5 7zm-.5-5.5c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/></svg>';
+            }
+            // وقود ومحروقات
+            if (str_contains($name, 'وقود') || str_contains($name, 'غاز') || str_contains($name, 'بنزين') || str_contains($name, 'سولار') || str_contains($name, 'محروقات')) {
+              return '<svg viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 10H6V6h6v4zm6 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>';
+            }
+            // فواكه
+            if (str_contains($name, 'فواكه') || str_contains($name, 'فاكهة') || str_contains($name, 'تفاح') || str_contains($name, 'موز')) {
+              return '<svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.15c.66-.8 1.1-1.92.98-3.04-1 .04-2.18.66-2.88 1.48-.6.7-.1.14-1.84 1.83-1.9 1.12-.04 2.24.62 2.82 1.46z"/></svg>';
+            }
+            // زيوت ودهون
+            if (str_contains($name, 'زيت') || str_contains($name, 'زيوت') || str_contains($name, 'دهون')) {
+              return '<svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
+            }
+            // ألبان وأجبان
+            if (str_contains($name, 'ألبان') || str_contains($name, 'لبن') || str_contains($name, 'حليب') || str_contains($name, 'جبن') || str_contains($name, 'أجبان')) {
+              return '<svg viewBox="0 0 24 24"><path d="M4 19h16v2H4zm14-8v6H6v-6h12m2-2H4v10h16V9zm-5-7H9v3h6V2z"/></svg>';
+            }
+            // أسماك
+            if (str_contains($name, 'سمك') || str_contains($name, 'أسماك') || str_contains($name, 'بحرية')) {
+              return '<svg viewBox="0 0 24 24"><path d="M22 12c-4 4-8 5-13 3l-5 4v-4l-2 1v-8l2 1v-4l5 4c5-2 9-1 13 3zm-6-1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>';
+            }
+            // مخبوزات
+            if (str_contains($name, 'مخبوز') || str_contains($name, 'خبز') || str_contains($name, 'كعك') || str_contains($name, 'معجنات')) {
+              return '<svg viewBox="0 0 24 24"><path d="M12 4C7.58 4 4 7.58 4 12c0 3.31 2.69 6 6 6h4c3.31 0 6-2.69 6-6 0-4.42-3.58-8-8-8zm-3 7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm3 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm3-3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>';
+            }
+            // الافتراضي (سلة تسوق)
+            return '<svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3H7c0 2.76 2.24 5 5 5s5-2.24 5-5h-2c0 1.66-1.34 3-3 3z"/></svg>';
+          };
         @endphp
 
-        <div class="categories-grid pt-3">
-          @forelse($categories as $i => $category)
+        <div class="home-categories-grid">
+          @forelse($categories as $category)
             @php
-              $palette = $catPalettes[$i % count($catPalettes)];
+              $minPrice = $category->items ? $category->items->where('min_price', '>', 0)->min('min_price') : null;
+              $sampleItems = $category->items ? $category->items->pluck('name')->filter()->take(2)->implode('، ') : '';
             @endphp
-            <a href="{{ route('prices') }}?category={{ urlencode($category->name) }}"
-               class="cat-pill"
-               style="--pill-icon-bg:{{ $palette['icon_bg'] }};--pill-accent:{{ $palette['accent'] }};--pill-gradient:{{ $palette['gradient'] }}">
-              <div class="cat-pill-icon" style="color: {{ $palette['accent'] }}; font-size: 1.4rem;">
-                @if($category->image && (str_starts_with($category->image, 'http') || str_starts_with($category->image, 'data:image')))
-                  <img src="{{ $category->image }}" alt="{{ $category->name }}">
-                @elseif($category->image && file_exists(public_path('storage/'.$category->image)))
-                  <img src="{{ asset('storage/'.$category->image) }}" alt="{{ $category->name }}">
+            <a href="{{ route('prices') }}?category={{ urlencode($category->name) }}" class="home-cat-card">
+              <!-- Top Protruding Notch with Icon -->
+              <div class="home-cat-tab">
+                <div class="home-cat-icon">
+                  @if($category->image_url)
+                    <img src="{{ $category->image_url }}" alt="{{ $category->name }}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">
+                    <span style="display:none;">{!! $getCatIconSvg($category->name) !!}</span>
+                  @else
+                    {!! $getCatIconSvg($category->name) !!}
+                  @endif
+                </div>
+              </div>
+
+              <!-- Main Body Info -->
+              <div class="home-cat-body">
+                <h3 class="home-cat-title">{{ $category->name }}</h3>
+                <span class="home-cat-count">{{ $category->items_count }} صنف</span>
+              </div>
+
+              <!-- Additional Details Footer -->
+              <div class="home-cat-details">
+                @if($minPrice)
+                  <span class="home-cat-price-tag" title="أقل سعر مسجل في هذا القسم">
+                    تبدأ من {{ number_format($minPrice, 1) }} ₪
+                  </span>
+                @elseif(!empty($sampleItems))
+                  <span class="small text-muted text-truncate" style="max-width: 110px; font-size: 0.75rem;" title="{{ $sampleItems }}">
+                    {{ $sampleItems }}
+                  </span>
                 @else
-                  <i class="bi {{ $palette['icon'] }}"></i>
+                  <span class="small text-muted" style="font-size: 0.75rem;">
+                    مقارنة الأسعار
+                  </span>
                 @endif
-              </div>
-              <div class="cat-pill-body">
-                <div class="cat-pill-name">{{ $category->name }}</div>
-                <div class="cat-pill-count">{{ $category->items_count }} صنف</div>
-              </div>
-              <div class="cat-pill-arrow">
-                <i class="bi bi-chevron-left"></i>
+                <span class="home-cat-arrow" title="عرض السلع">
+                  <i class="bi bi-chevron-left"></i>
+                </span>
               </div>
             </a>
           @empty
-            <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem;">لا توجد أقسام مسجلة حالياً</div>
+            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">لا توجد أقسام مسجلة حالياً</div>
           @endforelse
         </div>
       </section>
@@ -287,21 +338,7 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="main-footer">
-    <div class="container text-center">
-      <div class="footer-logo d-flex align-items-center justify-content-center gap-2">
-        <img src="{{ asset('assets/imges/logo.png') }}" alt="وفر كاش" class="footer-logo-img">
-        <span class="footer-logo-text"><span class="brand-green">وفر</span><span class="brand-white">كاش</span></span>
-      </div>
-      <div class="footer-tagline">منصة لمتابعة أسعار السوق في منطقتك</div>
-      <div class="footer-links d-flex justify-content-center gap-4">
-        <a href="#">سياسة الخصوصية</a>
-        <a href="#">الشروط والاحكام</a>
-        <a href="#">تواصل معنا</a>
-      </div>
-      <div class="copyright">© 2026 وفر كاش، جميع الحقوق محفوظة</div>
-    </div>
-  </footer>
+  @include('partials.footer')
 
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/script.js?v=8') }}"></script>

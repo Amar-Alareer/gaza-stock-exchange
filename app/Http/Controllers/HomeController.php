@@ -22,13 +22,21 @@ class HomeController extends Controller
             ->get();
 
         $categories = Category::withCount('items')
+            ->with(['items' => function ($q) {
+                $q->select('id', 'category_id', 'min_price', 'name')->orderBy('min_price', 'asc');
+            }])
             ->where('is_active', 1)
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
 
         if ($categories->isEmpty()) {
-            $categories = Category::withCount('items')->orderBy('id')->get();
+            $categories = Category::withCount('items')
+                ->with(['items' => function ($q) {
+                    $q->select('id', 'category_id', 'min_price', 'name')->orderBy('min_price', 'asc');
+                }])
+                ->orderBy('id')
+                ->get();
         }
 
         return view('index', compact('products', 'categories'));

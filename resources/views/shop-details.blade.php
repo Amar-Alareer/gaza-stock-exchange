@@ -55,7 +55,8 @@
 
           @if(Auth::check())
             <a href="{{ route('profile') }}" class="d-flex align-items-center text-decoration-none" title="الملف الشخصي">
-              <img src="{{ Auth::user()->profile_picture_url }}" alt="{{ Auth::user()->name }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-green);">
+              <img src="{{ Auth::user()->profile_picture_url }}" alt="{{ Auth::user()->name }}"
+                style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-green);">
             </a>
           @else
             <div class="d-flex align-items-center gap-2">
@@ -72,7 +73,8 @@
         <div class="d-flex d-lg-none align-items-center gap-2 order-3">
           @if(Auth::check())
             <a href="{{ route('profile') }}" class="d-flex align-items-center text-decoration-none">
-              <img src="{{ Auth::user()->profile_picture_url }}" alt="{{ Auth::user()->name }}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-green);">
+              <img src="{{ Auth::user()->profile_picture_url }}" alt="{{ Auth::user()->name }}"
+                style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-green);">
             </a>
           @else
             <a href="{{ route('login') }}" class="btn-nav-login py-1 px-2" style="font-size:0.8rem;">
@@ -122,7 +124,8 @@
           <a href="{{ route('login') }}" class="btn btn-outline-light w-100 rounded-pill fw-bold py-2">
             <i class="bi bi-box-arrow-in-left me-1"></i> تسجيل دخول
           </a>
-          <a href="{{ route('signup') }}" class="btn btn-success w-100 rounded-pill fw-bold py-2" style="background:#24df64;color:#0b2516;border:none;">
+          <a href="{{ route('signup') }}" class="btn btn-success w-100 rounded-pill fw-bold py-2"
+            style="background:#24df64;color:#0b2516;border:none;">
             <i class="bi bi-person-plus-fill me-1"></i> إنشاء حساب جديد
           </a>
         </div>
@@ -131,9 +134,7 @@
   </nav>
 
   @php
-    $storeImg = $store->image 
-        ? (str_starts_with($store->image, 'http') ? $store->image : asset('storage/'.$store->image))
-        : asset('assets/imges/shops.png');
+    $storeImg = $store->image_url ?: asset('assets/imges/shops.png');
     $regionName = $store->region ? $store->region->city_or_governorate . ' - ' . $store->region->area_name : ($store->address ?? 'قطاع غزة');
   @endphp
 
@@ -143,7 +144,8 @@
     <div class="container position-relative">
       <div class="d-flex justify-content-between align-items-start">
         <div class="text-end">
-          <h1 class="page-header-title mb-0"><span class="brand-green">صفحة</span> <span class="brand-white">المحل</span> <i class="bi bi-shop text-success fs-3"></i></h1>
+          <h1 class="page-header-title mb-0"><span class="brand-green">صفحة</span> <span
+              class="brand-white">المحل</span> <i class="bi bi-shop text-success fs-3"></i></h1>
           <p class="page-header-sub">بيانات وأسعار السلع المتوفرة لدى المتجر</p>
         </div>
       </div>
@@ -151,20 +153,11 @@
       <!-- CENTER OVERLAY STORE CARD -->
       <div class="store-hero-overlay-card mx-auto text-center bg-white p-4 rounded-4 shadow-lg">
         <div class="store-badge-icon mb-2">
-          <img src="{{ $storeImg }}" alt="{{ $store->name }}" class="rounded-circle shadow-sm" style="width: 70px; height: 70px; object-fit: cover; border: 3px solid var(--brand-green);">
+          <img src="{{ $storeImg }}" alt="{{ $store->name }}" class="rounded-circle shadow-sm"
+            style="width: 70px; height: 70px; object-fit: cover ; border: 3px solid var(--brand-green);">
         </div>
         <h3 class="fw-bolder mb-2">{{ $store->name }}</h3>
         <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-success me-1"></i> {{ $regionName }}</p>
-        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
-          <a href="{{ route('map') }}?search={{ urlencode($store->name) }}" class="btn btn-outline-success rounded-pill fw-bold px-3 py-1.5 small d-inline-flex align-items-center gap-1">
-            <i class="bi bi-geo-alt"></i> موقعه على الخريطة
-          </a>
-          @if($store->phone)
-            <a href="tel:{{ $store->phone }}" class="btn btn-success bg-gradient border-0 px-3 py-1.5 rounded-pill fw-bold small d-inline-flex align-items-center gap-1 text-white">
-              <i class="bi bi-telephone-fill"></i> اتصال مباشر
-            </a>
-          @endif
-        </div>
       </div>
     </div>
   </section>
@@ -176,8 +169,9 @@
       <div class="row g-4 pt-3">
         <!-- SIDEBAR INFO CARD (RIGHT IN RTL) -->
         <div class="col-12 col-lg-4">
-          <div class="bg-white rounded-4 shadow-sm p-4 text-end position-relative h-100">
-            <div class="bell-icon-top mb-3 d-inline-flex align-items-center justify-content-center p-2 rounded-circle bg-light text-success fs-5">
+          <div class="bg-white rounded-4 shadow-sm p-4 text-end position-relative">
+            <div
+              class="bell-icon-top mb-3 d-inline-flex align-items-center justify-content-center p-2 rounded-circle bg-light text-success fs-5">
               <i class="bi bi-shop"></i>
             </div>
 
@@ -209,17 +203,21 @@
                 <span class="fs-5 text-muted"><i class="bi bi-clock"></i></span>
                 <div>
                   <div class="fw-bold text-dark">ساعات العمل</div>
-                  <div class="small text-muted">{{ $store->working_hours ?? 'يومياً من 8:00 صباحاً حتى 10:00 مساءً' }}</div>
+                  <div class="small text-muted">{{ $store->working_hours ?? 'يومياً من 8:00 صباحاً حتى 10:00 مساءً' }}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <a href="{{ route('map') }}?search={{ urlencode($store->name) }}" class="btn-locate w-100 justify-content-center py-2.5 mb-3 text-decoration-none d-flex align-items-center gap-2">
+            <a href="{{ route('map') }}?search={{ urlencode($store->name) }}"
+              class="btn-locate w-100 justify-content-center py-2.5 mb-3 text-decoration-none d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt-fill"></i> عرض الموقع على الخريطة
             </a>
 
             @if($store->latitude && $store->longitude)
-              <a href="https://www.google.com/maps/dir/?api=1&destination={{ $store->latitude }},{{ $store->longitude }}" target="_blank" rel="noopener" class="btn btn-outline-secondary w-100 justify-content-center py-2 mb-4 rounded-3 d-flex align-items-center gap-2 small fw-bold">
+              <a href="https://www.google.com/maps/dir/?api=1&destination={{ $store->latitude }},{{ $store->longitude }}"
+                target="_blank" rel="noopener"
+                class="btn btn-outline-secondary w-100 justify-content-center py-2 mb-4 rounded-3 d-flex align-items-center gap-2 small fw-bold">
                 <i class="bi bi-map-fill text-success"></i> فتح مسار التنقل (Google Maps)
               </a>
             @endif
@@ -227,13 +225,16 @@
             <div class="contact-rows small d-flex flex-column gap-2 border-top pt-3">
               @if($store->phone)
                 <div class="d-flex align-items-center justify-content-between">
-                  <a href="tel:{{ $store->phone }}" class="text-decoration-none text-dark fw-bold"><i class="bi bi-telephone-fill text-success me-1"></i> {{ $store->phone }}</a>
+                  <a href="tel:{{ $store->phone }}" class="text-decoration-none text-dark fw-bold"><i
+                      class="bi bi-telephone-fill text-success me-1"></i> {{ $store->phone }}</a>
                   <span class="text-muted"><i class="bi bi-phone"></i></span>
                 </div>
               @endif
               @if($store->facebook_url)
                 <div class="d-flex align-items-center justify-content-between">
-                  <a href="{{ $store->facebook_url }}" target="_blank" rel="noopener" class="text-decoration-none text-primary fw-bold"><i class="bi bi-facebook me-1"></i> صفحة الفيسبوك</a>
+                  <a href="{{ $store->facebook_url }}" target="_blank" rel="noopener"
+                    class="text-decoration-none text-primary fw-bold"><i class="bi bi-facebook me-1"></i> صفحة
+                    الفيسبوك</a>
                   <span class="text-primary"><i class="bi bi-globe"></i></span>
                 </div>
               @endif
@@ -257,8 +258,8 @@
               <a href="{{ route('prices') }}" class="btn btn-success rounded-pill px-4 mt-2"><i class="bi bi-arrow-clockwise me-1"></i> تصفح كل الأسعار</a>
             </div>
           @else
-            <div class="row g-3 pb-4">
-              @foreach($storePrices as $sp)
+            <div class="row g-3 pb-4" id="products-container">
+              @foreach($storePrices as $index => $sp)
                 @php
                   $item = $sp->item;
                   if (!$item) continue;
@@ -266,15 +267,15 @@
                   $catIcons = ['خضراوات'=>'bi-basket','فواكه'=>'bi-apple','لحوم'=>'bi-egg-fried','مواد غذائية'=>'bi-cart3','زيوت ودهون'=>'bi-droplet','حبوب'=>'bi-box-seam','أسماك'=>'bi-water','ألبان'=>'bi-cup-hot','مخبوزات'=>'bi-cookie','وقود'=>'bi-fuel-pump'];
                   $catIcon = $catIcons[$categoryName] ?? 'bi-box-seam';
                 @endphp
-                <div class="col-12 col-sm-6 col-md-4">
+                
+                {{-- الكروت بعد الكرت رقم 9 (index >= 9) تكون مخفية تلقائياً --}}
+                <div class="col-12 col-sm-6 col-md-4 product-item-card {{ $index >= 9 ? 'd-none' : '' }}">
                   <div class="product-card h-100">
                     <div class="category-badge"><i class="bi {{ $catIcon }}"></i></div>
                     <div class="product-img-wrap">
-                      @if($item->image_url && str_starts_with($item->image_url, 'http'))
-                        <img src="{{ $item->image_url }}" alt="{{ $item->name }}" class="product-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                        <div style="display:none;font-size:2.5rem;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
-                      @elseif($item->image_url && file_exists(public_path('storage/'.$item->image_url)))
-                        <img src="{{ asset('storage/'.$item->image_url) }}" alt="{{ $item->name }}" class="product-img">
+                      @if($item->formatted_image_url)
+                        <img src="{{ $item->formatted_image_url }}" alt="{{ $item->name }}" class="product-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div style="display:none;font-size:3rem;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
                       @else
                         <div style="font-size:3rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
                       @endif
@@ -291,6 +292,17 @@
                 </div>
               @endforeach
             </div>
+
+            {{-- زر عرض المزيد في نفس الصفحة --}}
+            @if($storePrices->count() > 9)
+              <div class="text-center pt-2 pb-4" id="load-more-wrapper">
+                <button type="button" id="btn-load-more" onclick="loadMoreProducts()" class="btn btn-outline-success rounded-pill px-4 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+                  <span>رؤية المزيد من السلع ({{ $storePrices->count() - 9 }}+)</span>
+                  <i class="bi bi-arrow-down-circle-fill"></i>
+                </button>
+              </div>
+            @endif
+
           @endif
         </div>
       </div>
@@ -299,24 +311,25 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="main-footer">
-    <div class="container text-center">
-      <div class="footer-logo d-flex align-items-center justify-content-center gap-2">
-        <img src="{{ asset('assets/imges/logo.png') }}" alt="وفر كاش" class="footer-logo-img">
-        <span class="footer-logo-text"><span class="brand-green">وفر</span><span class="brand-white">كاش</span></span>
-      </div>
-      <div class="footer-tagline">منصة لمتابعة أسعار السوق في منطقتك</div>
-      <div class="footer-links d-flex justify-content-center gap-4">
-        <a href="#">سياسة الخصوصية</a>
-        <a href="#">الشروط والاحكام</a>
-        <a href="#">تواصل معنا</a>
-      </div>
-      <div class="copyright">© 2026 وفر كاش، جميع الحقوق محفوظة</div>
-    </div>
-  </footer>
+  @include('partials.footer')
 
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/script.js?v=8') }}"></script>
+  <script>
+    function loadMoreProducts() {
+      // إظهار العناصر المخفية
+      const hiddenCards = document.querySelectorAll('.product-item-card.d-none');
+      hiddenCards.forEach(card => {
+        card.classList.remove('d-none');
+      });
+
+      // إخفاء زر "رؤية المزيد" بعد عرض كل البطاقات
+      const btnWrapper = document.getElementById('load-more-wrapper');
+      if (btnWrapper) {
+        btnWrapper.style.display = 'none';
+      }
+    }
+  </script>
 </body>
 
 </html>

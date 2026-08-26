@@ -230,4 +230,34 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
+
+  // =========================================================
+  // Scroll Reveal & Staggered Animations
+  // =========================================================
+  var revealElements = document.querySelectorAll(
+    '.product-card, .store-card, .store-card-full, .shop-directory-card, .home-cat-card, .filter-card-container, .wafar-table, .section-title, .stat-card-clean, .cat-pill'
+  );
+
+  if ('IntersectionObserver' in window) {
+    var revealObserver = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -30px 0px',
+      threshold: 0.05
+    });
+
+    revealElements.forEach(function (el) {
+      el.classList.add('reveal-item');
+      revealObserver.observe(el);
+    });
+  } else {
+    revealElements.forEach(function (el) {
+      el.classList.add('is-revealed');
+    });
+  }
 });

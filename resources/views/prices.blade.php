@@ -229,12 +229,7 @@
       @if(isset($selectedStore) && $selectedStore)
         <div class="d-flex align-items-center justify-content-between p-3 mb-3 bg-white rounded-4 shadow-sm border border-success-subtle">
           <div class="d-flex align-items-center gap-3">
-            @php
-              $storeImg2 = $selectedStore->image
-                ? (str_starts_with($selectedStore->image,'http') ? $selectedStore->image : asset('storage/'.$selectedStore->image))
-                : asset('assets/imges/shops.png');
-            @endphp
-            <img src="{{ $storeImg2 }}" alt="{{ $selectedStore->name }}" class="rounded-circle shadow-sm"
+            <img src="{{ $selectedStore->image_url }}" alt="{{ $selectedStore->name }}" class="rounded-circle shadow-sm"
                  style="width:46px;height:46px;object-fit:cover;border:2px solid var(--brand-green);"
                  onerror="this.src='{{ asset('assets/imges/shops.png') }}'">
             <div>
@@ -319,12 +314,10 @@
                 <div class="category-badge" title="{{ $categoryName }}"><i class="bi {{ $catIcon }}"></i></div>
 
                 <div class="product-img-wrap">
-                  @if($product->image_url && str_starts_with($product->image_url, 'http'))
-                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="product-img"
+                  @if($product->formatted_image_url)
+                    <img src="{{ $product->formatted_image_url }}" alt="{{ $product->name }}" class="product-img"
                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                    <div style="display:none;font-size:2.5rem;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
-                  @elseif($product->image_url && file_exists(public_path('storage/'.$product->image_url)))
-                    <img src="{{ asset('storage/'.$product->image_url) }}" alt="{{ $product->name }}" class="product-img">
+                    <div style="display:none;font-size:3rem;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
                   @else
                     <div style="font-size:3rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#16a34a;"><i class="bi {{ $catIcon }}"></i></div>
                   @endif
@@ -359,21 +352,7 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="main-footer">
-    <div class="container text-center">
-      <div class="footer-logo d-flex align-items-center justify-content-center gap-2">
-        <img src="{{ asset('assets/imges/logo.png') }}" alt="وفر كاش" class="footer-logo-img">
-        <span class="footer-logo-text"><span class="brand-green">وفر</span><span class="brand-white">كاش</span></span>
-      </div>
-      <div class="footer-tagline">منصة لمتابعة أسعار السوق في منطقتك</div>
-      <div class="footer-links d-flex justify-content-center gap-4">
-        <a href="#">سياسة الخصوصية</a>
-        <a href="#">الشروط والاحكام</a>
-        <a href="#">تواصل معنا</a>
-      </div>
-      <div class="copyright">© 2026 وفر كاش، جميع الحقوق محفوظة</div>
-    </div>
-  </footer>
+  @include('partials.footer')
 
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/script.js?v=8') }}"></script>

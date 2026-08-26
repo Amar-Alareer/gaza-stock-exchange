@@ -640,6 +640,12 @@ a {
   margin-left: 6px;
 }
 
+/* spinner داكن للأزرار ذات الخلفية الفاتحة (مثل زر Google) */
+.btn-spinner--dark {
+  border-color: rgba(60, 60, 60, 0.25);
+  border-top-color: #3c3c3c;
+}
+
 /* ----------------------------------------------------------
    4. مكونات الترويسة والشريط الجانبي (Header & Sidebar)
 ---------------------------------------------------------- */
@@ -1275,7 +1281,7 @@ a {
 }
 
 /* ----------------------------------------------------------
-   6. الحركات والأنيميشن الموحدة (Animations)
+   6. الحركات والأنيميشن الموحدة (Modern Admin Animations)
 ---------------------------------------------------------- */
 @keyframes spin {
   to {
@@ -1286,24 +1292,98 @@ a {
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(8px);
   }
-
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes slideUp {
   from {
-    transform: translateY(24px);
+    transform: translateY(20px);
     opacity: 0;
   }
-
   to {
     transform: translateY(0);
     opacity: 1;
   }
 }
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* انتقال الصفحات الرئيسي في لوحة التحكم */
+.admin-page-transition-enter-active,
+.admin-page-transition-leave-active {
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-page-transition-enter-from {
+  opacity: 0;
+  transform: translateY(10px) scale(0.995);
+}
+
+.admin-page-transition-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.995);
+}
+
+/* بطاقات الإحصائيات مع تأثير الظهور */
+.stats-card, .stat-card, .shops-grid > div, .categories-grid > div {
+  animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.stats-card:hover, .stat-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* تأثير التفاعل مع الأزرار */
+.btn-primary, .btn-secondary, .btn-add, .btn-action, .btn-save, .page-btn {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-primary:active, .btn-secondary:active, .btn-add:active, .btn-action:active {
+  transform: scale(0.96) !important;
+}
+
+/* حركات الجداول */
+.data-table tbody tr, .admin-table tbody tr {
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.data-table tbody tr:hover, .admin-table tbody tr:hover {
+  transform: scale(1.002);
+}
+
+/* النوافذ المنبثقة (Modals) */
+.modal-card, .dialog-card {
+  animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.modal-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: backdrop-filter 0.3s ease;
+}
+
+/* التنبيهات المنبثقة (Toasts) */
+.toast-notification {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 
 /* ----------------------------------------------------------
    7. شاشات التجاوب والتكيف المجمعة (Media Queries)

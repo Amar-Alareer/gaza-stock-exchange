@@ -294,9 +294,7 @@
       <div class="row g-4 mb-5" id="shops-grid-container">
         @forelse($stores as $store)
           @php
-            $storeImg = $store->image 
-              ? (str_starts_with($store->image, 'http') ? $store->image : asset('storage/'.$store->image))
-              : asset('assets/imges/shops.png');
+            $storeImg = $store->image_url ?: asset('assets/imges/shops.png');
             $regionName = $store->region ? $store->region->city_or_governorate . ' - ' . $store->region->area_name : ($store->address ?? 'قطاع غزة');
             $isFav = $userFavoriteStoreIds->contains($store->id);
             // Collect unique category names from store prices
@@ -492,22 +490,7 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="main-footer">
-    <div class="container text-center">
-      <div class="footer-logo d-flex align-items-center justify-content-center gap-2">
-        <img src="{{ asset('assets/imges/logo.png') }}" alt="وفر كاش" class="footer-logo-img">
-        <span class="footer-logo-text"><span class="brand-green">وفر</span><span class="brand-white">كاش</span></span>
-      </div>
-      <div class="footer-tagline">منصة لمتابعة أسعار السوق في منطقتك</div>
-      <div class="footer-links d-flex justify-content-center gap-4">
-        <a href="#">سياسة الخصوصية</a>
-        <a href="#">الشروط والاحكام</a>
-        <a href="#">تواصل معنا</a>
-      </div>
-      <div class="copyright">© 2026 وفر كاش، جميع الحقوق محفوظة</div>
-    </div>
-  </footer>
+  
 
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/script.js?v=8') }}"></script>
@@ -734,6 +717,8 @@
       setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(() => t.remove(), 400); }, 2200);
     }
   </script>
+
+  @include('partials.footer')
 </body>
 
 </html>

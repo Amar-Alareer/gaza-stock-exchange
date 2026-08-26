@@ -181,6 +181,94 @@ class AuthController extends Controller
     }
 
     // ============================
+    //  API GOOGLE LOGIN (للـ Admin SPA)
+    // ============================
+
+    /**
+     * apiGoogleLogin - تسجيل دخول عبر Google token للـ Admin Vue SPA
+     * يستقبل google_token من الـ Frontend ويتحقق منه عبر Google API
+     * ثم يعيد Sanctum token إذا كان الحساب admin
+     */
+    public function apiGoogleLogin(Request $request)
+    {
+        $request->validate([
+            'google_token' => 'required|string',
+        ]);
+
+        try {
+            // التحقق من الـ token عبر Google API مباشرة
+            $response = \Illuminate\Support\Facades\Http::get('https://www.googleapis.com/oauth2/v3/userinfo', [
+                'access_token' => $request->google_token,
+            ]);
+
+            if (!$response->successful()) {
+                return response()->json(['message' => 'رمز Google غير صالح.'], 401);
+            }
+
+            $googleData = $response->json();
+
+            if (empty($googleData['email'])) {
+                return response()->json(['message' => 'تعذر الحصول على البريد الإلكتروني من حساب Google.'], 400);
+            }
+
+            // البحث عن المستخدم بالـ google_id أو البريد
+            $user = User::where('google_id', $googleData['sub'] ?? '')
+                ->orWhere('email', $googleData['email'])
+                ->first();
+
+            if ($user) {
+                // تحديث بيانات Google إن لم تكن موجودة
+                if (empty($user->google_id)) {
+                    $user->google_id = $googleData['sub'] ?? null;
+                }
+                if (!$user->profile_picture && !empty($googleData['picture'])) {
+                    $user->profile_picture = $googleData['picture'];
+                }
+                $user->save();
+            } else {
+                // إنشاء حساب جديد (role = client بشكل افتراضي)
+                $defaultRegionId = \App\Models\Region::first()->id ?? null;
+                $user = User::create([
+                    'name'            => $googleData['name'] ?? 'مستخدم جديد',
+                    'email'           => $googleData['email'],
+                    'google_id'       => $googleData['sub'] ?? null,
+                    'profile_picture' => $googleData['picture'] ?? null,
+                    'region_id'       => $defaultRegionId,
+                    'password'        => Hash::make(Str::random(24)),
+                    'role'            => 'client',
+                ]);
+            }
+
+            // التحقق أن الحساب admin
+            if ($user->role !== 'admin') {
+                return response()->json([
+                    'message' => 'عذراً، هذا الحساب (' . $user->email . ') ليس لديه صلاحيات المسؤول. يُسمح فقط للحسابات ذات دور admin.',
+                ], 403);
+            }
+
+            // إنشاء Sanctum token
+            $token = $user->createToken('google-admin-token')->plainTextToken;
+
+            $user->append('profile_picture_url');
+
+            return response()->json([
+                'token' => $token,
+                'user'  => [
+                    'id'                  => $user->id,
+                    'name'                => $user->name,
+                    'email'               => $user->email,
+                    'role'                => $user->role,
+                    'profile_picture_url' => $user->profile_picture_url,
+                ],
+                'message' => 'تم تسجيل الدخول عبر Google بنجاح',
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'حدث خطأ أثناء التحقق من حساب Google: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // ============================
     //  PROFILE UPDATE
     // ============================
 

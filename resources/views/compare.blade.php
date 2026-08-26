@@ -754,21 +754,7 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="main-footer">
-    <div class="container text-center">
-      <div class="footer-logo d-flex align-items-center justify-content-center gap-2">
-        <img src="{{ asset('assets/imges/logo.png') }}" alt="وفر كاش" class="footer-logo-img">
-        <span class="footer-logo-text"><span class="brand-green">وفر</span><span class="brand-white">كاش</span></span>
-      </div>
-      <div class="footer-tagline">منصة لمتابعة أسعار السوق في منطقتك</div>
-      <div class="footer-links d-flex justify-content-center gap-4">
-        <a href="#">سياسة الخصوصية</a>
-        <a href="#">الشروط والاحكام</a>
-        <a href="#">تواصل معنا</a>
-      </div>
-      <div class="copyright">© 2026 وفر كاش، جميع الحقوق محفوظة</div>
-    </div>
-  </footer>
+  @include('partials.footer')
 
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/script.js?v=8') }}"></script>
@@ -830,9 +816,9 @@
             popupAnchor: [0, -20]
           });
 
-          const storeImg = store.image 
-            ? (store.image.startsWith('http') ? store.image : '{{ asset("storage") }}/' + store.image)
-            : '{{ asset("assets/imges/shops.png") }}';
+          const storeImg = store.image_url || (store.image 
+            ? (store.image.startsWith('http') || store.image.startsWith('data:image') ? store.image : '{{ asset("storage") }}/' + store.image)
+            : '{{ asset("assets/imges/shops.png") }}');
 
           const regionName = store.region ? (store.region.city_or_governorate + ' - ' + store.region.area_name) : (store.address || 'غزة');
           const detailsUrl = `{{ url('/shop_details') }}/${store.id}`;
