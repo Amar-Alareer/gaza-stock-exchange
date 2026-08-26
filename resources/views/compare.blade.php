@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=8') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=10') }}">
   <link rel="icon" type="image/png" href="{{ asset('assets/imges/logo.png') }}">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -85,6 +85,7 @@
 </head>
 
 <body>
+  @include('partials.splash-screen')
 
   <!-- NAVBAR -->
   <nav class="navbar navbar-wafar">

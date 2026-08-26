@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=8') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=10') }}">
   <link rel="icon" type="image/png" href="{{ asset('assets/imges/logo.png') }}">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -72,6 +72,7 @@
 </head>
 
 <body>
+  @include('partials.splash-screen')
 
   <!-- NAVBAR -->
   <nav class="navbar navbar-wafar">
@@ -477,6 +478,9 @@
             <i class="bi bi-map-fill"></i> فتح الاتجاهات في Google Maps
           </a>
           <div class="d-flex gap-2">
+            <a href="#" id="modal-all-stores-map-btn" class="btn btn-outline-dark rounded-pill fw-bold">
+              <i class="bi bi-map me-1"></i> رؤية المزيد من المحلات
+            </a>
             <a href="#" id="modal-prices-btn" class="btn btn-outline-success rounded-pill fw-bold">
               <i class="bi bi-tag-fill me-1"></i> السلع والأسعار
             </a>
@@ -585,6 +589,7 @@
       document.getElementById('modal-store-prices_count') ? document.getElementById('modal-store-prices_count').innerText = (store.prices_count || 0) + ' سلعة' : null;
       document.getElementById('modal-details-btn').href = store.details_url;
       document.getElementById('modal-prices-btn').href = store.prices_url;
+      document.getElementById('modal-all-stores-map-btn').href = `{{ route('map') }}?store_id=${encodeURIComponent(store.id)}`;
 
       const storeLat = parseFloat(store.lat) || 31.501;
       const storeLng = parseFloat(store.lng) || 34.466;

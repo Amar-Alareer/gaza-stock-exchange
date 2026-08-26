@@ -4,17 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>وفر كاش | {{ $store->name ?? 'صفحة المحل' }}</title>
   <meta name="description" content="استعرض تفاصيل وأسعار السلع المتوفرة لدى {{ $store->name ?? 'المحل' }}">
   <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=8') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=15') }}">
   <link rel="icon" type="image/png" href="{{ asset('assets/imges/logo.png') }}">
 </head>
 
 <body>
+  @include('partials.splash-screen')
 
   <!-- NAVBAR -->
   <nav class="navbar navbar-wafar">
@@ -135,12 +138,15 @@
 
   @php
     $storeImg = $store->image_url ?: asset('assets/imges/shops.png');
+    $storeCover = $store->cover_image_url ?: asset('assets/imges/baner.png');
     $regionName = $store->region ? $store->region->city_or_governorate . ' - ' . $store->region->area_name : ($store->address ?? 'قطاع غزة');
+    $isFavoriteStore = Auth::check() && \App\Models\UserFavorite::where('user_id', Auth::id())
+      ->where('type', 'store')->where('reference_id', $store->id)->exists();
   @endphp
 
   <!-- STORE DETAILS HERO BANNER -->
-  <section class="shops-header-banner py-5">
-    <img src="{{ asset('assets/imges/baner.png') }}" alt="خريطة" class="hero-bg-img">
+  <section class="shops-header-banner store-details-banner py-5">
+    <img src="{{ $storeCover }}" alt="{{ $store->name }}" class="hero-bg-img">
     <div class="container position-relative">
       <div class="d-flex justify-content-between align-items-start">
         <div class="text-end">
@@ -151,13 +157,18 @@
       </div>
 
       <!-- CENTER OVERLAY STORE CARD -->
-      <div class="store-hero-overlay-card mx-auto text-center bg-white p-4 rounded-4 shadow-lg">
-        <div class="store-badge-icon mb-2">
-          <img src="{{ $storeImg }}" alt="{{ $store->name }}" class="rounded-circle shadow-sm"
-            style="width: 70px; height: 70px; object-fit: cover ; border: 3px solid var(--brand-green);">
+      <div class="store-hero-overlay-card store-identity-card mx-auto text-center">
+        <div class="store-identity-image-wrap">
+          <img src="{{ $storeImg }}" alt="{{ $store->name }}" class="store-identity-image">
         </div>
-        <h3 class="fw-bolder mb-2">{{ $store->name }}</h3>
-        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill text-success me-1"></i> {{ $regionName }}</p>
+        <h3 class="store-identity-name">{{ $store->name }}</h3>
+        <p class="store-identity-region"><i class="bi bi-geo-alt-fill"></i> {{ $regionName }}</p>
+        <button type="button" id="store-favorite-button"
+          class="store-favorite-button {{ $isFavoriteStore ? 'is-favorite' : '' }}"
+          onclick="toggleStoreFavorite({{ $store->id }}, this)">
+          <span class="favorite-label">{{ $isFavoriteStore ? 'إزالة من المفضلة' : 'إضافة للمفضلة' }}</span>
+          <i class="bi {{ $isFavoriteStore ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+        </button>
       </div>
     </div>
   </section>
@@ -209,10 +220,17 @@
               </div>
             </div>
 
-            <a href="{{ route('map') }}?search={{ urlencode($store->name) }}"
-              class="btn-locate w-100 justify-content-center py-2.5 mb-3 text-decoration-none d-flex align-items-center gap-2">
-              <i class="bi bi-geo-alt-fill"></i> عرض الموقع على الخريطة
-            </a>
+            @if($store->latitude && $store->longitude)
+              <button type="button" id="open-store-map-modal"
+                class="btn-locate w-100 justify-content-center py-2.5 mb-3 border-0 d-flex align-items-center gap-2">
+                <i class="bi bi-geo-alt-fill"></i> عرض الموقع على الخريطة
+              </button>
+            @else
+              <a href="{{ route('map', ['store_id' => $store->id]) }}"
+                class="btn-locate w-100 justify-content-center py-2.5 mb-3 text-decoration-none d-flex align-items-center gap-2">
+                <i class="bi bi-geo-alt-fill"></i> عرض الموقع على الخريطة
+              </a>
+            @endif
 
             @if($store->latitude && $store->longitude)
               <a href="https://www.google.com/maps/dir/?api=1&destination={{ $store->latitude }},{{ $store->longitude }}"
@@ -313,9 +331,97 @@
   <!-- FOOTER -->
   @include('partials.footer')
 
+  <div class="modal fade" id="storeLocationModal" tabindex="-1" aria-labelledby="storeLocationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header border-0 bg-light px-4 py-3">
+          <div>
+            <h5 class="modal-title fw-bold mb-1" id="storeLocationModalLabel"><i class="bi bi-geo-alt-fill text-success me-1"></i> موقع {{ $store->name }}</h5>
+            <p class="small text-muted mb-0">{{ $regionName }}</p>
+          </div>
+          <button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="store-details-modal-map" class="rounded-4 border shadow-sm" style="height: 340px;"></div>
+          <div class="d-flex align-items-center gap-2 mt-3 small text-muted">
+            <i class="bi bi-info-circle text-success"></i> يمكنك فتح الخريطة التفاعلية لرؤية المحلات القريبة وتفاصيلها.
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light px-4 py-3">
+          <a href="{{ route('map', ['store_id' => $store->id]) }}" class="btn btn-success rounded-pill fw-bold px-4">
+            <i class="bi bi-map me-1"></i> رؤية المزيد من المحلات والتفاصيل
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/script.js?v=8') }}"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
+    (() => {
+      const trigger = document.getElementById('open-store-map-modal');
+      const modalElement = document.getElementById('storeLocationModal');
+      if (!trigger || !modalElement || !window.L) return;
+
+      const storeLat = {{ (float) $store->latitude }};
+      const storeLng = {{ (float) $store->longitude }};
+      let storeMap;
+      let storeMarker;
+
+      trigger.addEventListener('click', () => bootstrap.Modal.getOrCreateInstance(modalElement).show());
+      modalElement.addEventListener('shown.bs.modal', () => {
+        if (!storeMap) {
+          storeMap = L.map('store-details-modal-map').setView([storeLat, storeLng], 15);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+          }).addTo(storeMap);
+          storeMarker = L.marker([storeLat, storeLng]).addTo(storeMap)
+            .bindPopup('<strong>{{ addslashes($store->name) }}</strong>').openPopup();
+        }
+        storeMap.invalidateSize();
+        storeMap.setView([storeLat, storeLng], 15);
+      });
+    })();
+
+    function toggleStoreFavorite(storeId, button) {
+      @if(!Auth::check())
+        window.location.href = '{{ route('login') }}';
+        return;
+      @endif
+
+      const label = button.querySelector('.favorite-label');
+      const icon = button.querySelector('i');
+      button.disabled = true;
+
+      fetch('{{ route('favorites.toggle') }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ type: 'store', reference_id: storeId })
+      })
+      .then(response => {
+        if (response.status === 401) {
+          window.location.href = '{{ route('login') }}';
+          return null;
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data) return;
+        const isAdded = data.status === 'added';
+        button.classList.toggle('is-favorite', isAdded);
+        label.textContent = isAdded ? 'إزالة من المفضلة' : 'إضافة للمفضلة';
+        icon.className = `bi ${isAdded ? 'bi-heart-fill' : 'bi-heart'}`;
+      })
+      .catch(() => alert('حدث خطأ، حاول مرة أخرى.'))
+      .finally(() => { button.disabled = false; });
+    }
+
     function loadMoreProducts() {
       // إظهار العناصر المخفية
       const hiddenCards = document.querySelectorAll('.product-item-card.d-none');

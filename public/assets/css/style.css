@@ -27,7 +27,7 @@ a{ text-decoration: none; }
 /* ===== NAVBAR ===== */
 .navbar-wafar{
   background: var(--dark-green);
-  padding: .8rem 0;
+  padding: .75rem 0;
   position: relative;
   z-index: 50;
   border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -45,6 +45,11 @@ a{ text-decoration: none; }
   text-align: right;
 }
 
+.brand-logo .logo-text .ar{
+  display: block;
+  letter-spacing: -.02em;
+}
+
 .brand-logo .brand-green{
   color: var(--brand-green);
   font-weight: 800;
@@ -60,21 +65,27 @@ a{ text-decoration: none; }
 
 .brand-logo .logo-text .en{
   color: var(--brand-green);
-  font-size: .55rem;
-  letter-spacing: 2px;
+  font-size: .58rem;
+  letter-spacing: 1.7px;
   font-weight: 700;
   display: block;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* Nav links */
 .navbar-wafar .nav-link{
   color: #ffffff;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: .98rem;
   padding: .4rem 0 !important;
   position: relative;
-  transition: color .2s;
+  letter-spacing: -.01em;
+  transition: color .2s ease, transform .2s ease;
+}
+
+.navbar-wafar .nav-link:hover{
+  color: var(--brand-green);
+  transform: translateY(-1px);
 }
 
 .navbar-wafar .nav-link.active{
@@ -97,15 +108,25 @@ a{ text-decoration: none; }
   background: var(--brand-green);
   color: var(--dark-green);
   font-weight: 800;
-  font-size: .9rem;
+  font-size: .84rem;
   border-radius: 24px;
-  padding: .5rem 1.2rem;
+  padding: .48rem 1rem;
   border: none;
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
+  gap: .36rem;
+  flex-shrink: 0;
   white-space: nowrap;
   transition: transform .15s ease, background-color .2s ease;
+}
+
+/* Keep the full label legible on smaller desktop/tablet widths. */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .navbar-wafar .btn-compare {
+    font-size: .68rem;
+    padding: .42rem .58rem;
+    gap: .22rem;
+  }
 }
 
 .btn-compare:hover{
@@ -117,7 +138,7 @@ a{ text-decoration: none; }
 .btn-nav-login{
   color: #ffffff;
   font-weight: 700;
-  font-size: .88rem;
+  font-size: .86rem;
   padding: .42rem .95rem;
   border-radius: 22px;
   text-decoration: none;
@@ -139,7 +160,7 @@ a{ text-decoration: none; }
   background: var(--brand-green);
   color: var(--dark-green);
   font-weight: 800;
-  font-size: .88rem;
+  font-size: .86rem;
   padding: .42rem 1.05rem;
   border-radius: 22px;
   text-decoration: none;
@@ -347,6 +368,40 @@ a{ text-decoration: none; }
 .search-pill button:hover{
   background: #1fcf5b;
   transform: scale(1.08);
+}
+
+/* Navbar motion keeps the original layout while making its appearance feel lighter. */
+@media (prefers-reduced-motion: no-preference) {
+  .navbar-wafar .brand-logo {
+    animation: wafar-nav-enter .45s ease-out both;
+  }
+
+  .navbar-wafar .nav-item {
+    animation: wafar-nav-enter .42s ease-out both;
+  }
+
+  .navbar-wafar .nav-item:nth-child(1) { animation-delay: .06s; }
+  .navbar-wafar .nav-item:nth-child(2) { animation-delay: .11s; }
+  .navbar-wafar .nav-item:nth-child(3) { animation-delay: .16s; }
+  .navbar-wafar .nav-item:nth-child(4) { animation-delay: .21s; }
+
+  .navbar-wafar .brand-logo .logo-icon {
+    transition: transform .25s ease, filter .25s ease;
+  }
+
+  .navbar-wafar .brand-logo a:hover .logo-icon {
+    transform: rotate(-5deg) scale(1.05);
+    filter: drop-shadow(0 3px 6px rgba(36, 223, 100, .28));
+  }
+
+  .navbar-wafar .d-lg-flex.order-3 > * {
+    animation: wafar-nav-enter .42s .18s ease-out both;
+  }
+}
+
+@keyframes wafar-nav-enter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Modern Embedded Search Input with Circular Button */
@@ -2087,10 +2142,14 @@ a{ text-decoration: none; }
   }
 
   /* Quick action buttons */
-  .btn-compare {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
+  .navbar-wafar .btn-compare {
+    padding: 0.36rem 0.42rem !important;
+    font-size: 0.58rem !important;
+    gap: 0.18rem;
+    line-height: 1.1;
   }
+
+  .navbar-wafar .btn-compare i { font-size: 0.75rem; }
 }
 
 /* =========================================================
@@ -2213,3 +2272,19 @@ a{ text-decoration: none; }
   display: inline-block;
   animation: floatLogo 3s ease-in-out infinite;
 }
+
+/* Store details identity card */
+.store-details-banner { z-index: 3; }
+.store-details-banner::before { background: linear-gradient(90deg, rgba(3, 44, 19, .9), rgba(5, 76, 29, .38), rgba(3, 44, 19, .9)); }
+.store-details-banner + .page-body { position: relative; z-index: 1; padding-top: 5rem; }
+.store-identity-card { width: min(92vw, 385px); padding: 3.85rem 1.5rem 1.45rem; border: 1px solid rgba(255, 255, 255, .55); border-radius: 18px; background: linear-gradient(135deg, rgba(241, 250, 239, .81), rgba(210, 231, 207, .72)); box-shadow: 0 15px 30px rgba(4, 41, 20, .28); backdrop-filter: blur(12px); }
+.store-identity-image-wrap { position: absolute; top: -62px; right: 50%; width: 130px; height: 130px; padding: 5px; overflow: hidden; border-radius: 20px; background: rgba(255, 255, 255, .92); box-shadow: 0 10px 20px rgba(0, 44, 19, .33); transform: translateX(50%); }
+.store-identity-image { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+.store-identity-name { margin: 0; color: #0c2413; font-size: clamp(1.15rem, 2.2vw, 1.55rem); font-weight: 900; }
+.store-identity-region { margin: .38rem 0 .8rem; color: #46604b; font-size: .82rem; }
+.store-identity-region i { color: #1d9d46; }
+.store-favorite-button { display: inline-flex; align-items: center; justify-content: center; gap: .7rem; min-width: 195px; padding: .53rem 1.15rem; border: 0; border-radius: 999px; background: #438a28; color: #fff; font: 800 .85rem 'Tajawal', sans-serif; box-shadow: 0 5px 12px rgba(37, 112, 33, .25); transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; }
+.store-favorite-button:hover { background: #287820; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(37, 112, 33, .3); }
+.store-favorite-button.is-favorite { background: #c13b4d; }
+.store-favorite-button:disabled { opacity: .7; cursor: wait; }
+@media (max-width: 576px) { .store-details-banner + .page-body { padding-top: 4rem; } .store-identity-card { padding-top: 3.25rem; margin-bottom: -45px; } .store-identity-image-wrap { top: -50px; width: 108px; height: 108px; } .store-favorite-button { min-width: 180px; } }

@@ -8,10 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="{{asset('assets/css/style.css?v=8')}}">
+<link rel="stylesheet" href="{{asset('assets/css/style.css?v=10')}}">
 <link rel="icon" type="image/png" href="{{asset('assets/imges/logo.png')}}">
 </head>
 <body class="auth-page-body">
+  @include('partials.splash-screen')
 <img src="{{asset('assets/imges/map.png')}}" alt="خلفية" class="auth-bg-img">
 <div class="container d-flex align-items-center justify-content-center min-vh-100 py-4">
   <div class="auth-card row g-0 w-100 overflow-hidden shadow-lg rounded-5" style="max-width: 1000px;">
@@ -123,4 +124,3 @@
 <script src="{{asset('assets/js/script.js?v=8')}}"></script>
 </body>
 </html>
-

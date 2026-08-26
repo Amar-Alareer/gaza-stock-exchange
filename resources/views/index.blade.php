@@ -8,10 +8,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=8') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=13') }}">
   <link rel="icon" type="image/png" href="{{ asset('assets/imges/logo.png') }}">
 </head>
 <body>
+  @include('partials.splash-screen')
 
   <!-- NAVBAR -->
   <nav class="navbar navbar-wafar">
@@ -140,7 +141,7 @@
           <img src="{{ asset('assets/imges/map.png') }}" class="hero-img" alt="خريطة 1">
         </div>
         <div class="carousel-item">
-          <img src="{{ asset('assets/imges/22.png') }}" class="hero-img" alt="صورة 2">
+          <img src="{{ asset('assets/imges/hero-market-comparison.png') }}" class="hero-img" alt="مقارنة أسعار المنتجات داخل المتجر">
         </div>
       </div>
     </div>

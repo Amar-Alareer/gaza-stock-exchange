@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=8') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css?v=10') }}">
   <link rel="icon" type="image/png" href="{{ asset('assets/imges/logo.png') }}">
 
   <!-- LEAFLET.JS MAP STYLES -->
@@ -242,6 +242,7 @@
 </head>
 
 <body>
+  @include('partials.splash-screen')
 
   <!-- NAVBAR -->
   <nav class="navbar navbar-wafar">
@@ -475,6 +476,7 @@
     // All stores data injected from database
     const allStoresData = @json($allStores);
     let rawStoresData = [...allStoresData];
+    const requestedStoreId = new URLSearchParams(window.location.search).get('store_id');
     let currentUserLat = null;
     let currentUserLng = null;
     let userMarker = null;
@@ -699,6 +701,15 @@
         }
     }
 
+    function focusRequestedStore() {
+        if (!requestedStoreId) return;
+
+        const store = allStoresData.find(item => String(item.id) === String(requestedStoreId));
+        if (!store?.latitude || !store?.longitude) return;
+
+        setTimeout(() => focusStoreOnMap(parseFloat(store.latitude), parseFloat(store.longitude), store.id), 350);
+    }
+
     // Set and Handle User Location
     function setUserLocation(lat, lng) {
         currentUserLat = lat;
@@ -907,6 +918,7 @@
     window.addEventListener('DOMContentLoaded', () => {
         renderSidebarList();
         const bounds = renderMapMarkers();
+        focusRequestedStore();
 
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
