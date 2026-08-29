@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->boolean('is_active')->default(true); // حالة التفعيل
-            // $table->integer('sort_order')->default(0); // لترتيب عرض التصنيفات
+            $table->integer('sort_order')->default(0); // لترتيب عرض التصنيفات
             $table->timestamps();
         });
     }
