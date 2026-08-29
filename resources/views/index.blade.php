@@ -189,13 +189,14 @@
                   $bestStore = $product->best_store;
                   $categoryName = $product->category_name;
                   $timeAgo = $product->formatted_updated_at;
+                  $bestStoreId = $product->prices->filter(fn ($price) => $price->store_id)->sortBy('price')->first()?->store_id;
                 @endphp
                 <tr onclick="window.location='{{ route('products.show', $product->id) }}'" style="cursor: pointer;">
-                  <td><div class="cell-card item-name"><i class="bi bi-box-seam me-1 text-success"></i> {{ $product->name }}</div></td>
-                  <td><div class="cell-card price-tag">{{ $bestPrice ? $bestPrice . ' شيكل' : 'غير محدد' }}</div></td>
-                  <td><div class="cell-card"><span class="badge bg-light text-dark"><i class="bi bi-tag-fill text-success me-1"></i> {{ $categoryName }}</span></div></td>
-                  <td><div class="cell-card"><i class="bi bi-shop me-1 text-muted"></i> {{ $bestStore }}</div></td>
-                  <td><div class="cell-card updated"><i class="bi bi-clock me-1"></i> {{ $timeAgo }}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='{{ route('products.show', $product->id) }}'" title="عرض تفاصيل السلعة"><div class="cell-card item-name"><i class="bi bi-box-seam me-1 text-success"></i> {{ $product->name }}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='{{ route('prices', ['search' => $product->name]) }}'" title="عرض أسعار هذه السلعة"><div class="cell-card price-tag">{{ $bestPrice ? $bestPrice . ' شيكل' : 'غير محدد' }}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='{{ route('prices', ['category' => $categoryName]) }}'" title="عرض سلع هذا التصنيف"><div class="cell-card"><span class="badge bg-light text-dark"><i class="bi bi-tag-fill text-success me-1"></i> {{ $categoryName }}</span></div></td>
+                  <td @if($bestStoreId) onclick="event.stopPropagation(); window.location='{{ route('shop-details.show', $bestStoreId) }}'" title="عرض صفحة المحل" @endif><div class="cell-card"><i class="bi bi-shop me-1 text-muted"></i> {{ $bestStore }}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='{{ route('products.show', $product->id) }}'" title="عرض تفاصيل آخر تحديث"><div class="cell-card updated"><i class="bi bi-clock me-1"></i> {{ $timeAgo }}</div></td>
                 </tr>
               @empty
                 <tr>
@@ -221,7 +222,7 @@
                 <i class="bi bi-box-seam text-success"></i>
                 <span>{{ $product->name }}</span>
               </div>
-              <div class="item-price-cell">
+              <div class="item-price-cell" onclick="event.stopPropagation(); window.location='{{ route('prices', ['search' => $product->name]) }}'">
                 <span class="price-val">{{ $bestPrice ? $bestPrice . ' شيكل' : 'غير محدد' }}</span>
               </div>
             </div>
@@ -345,12 +346,17 @@
   <script src="{{ asset('assets/js/script.js?v=8') }}"></script>
   <script>
     let offset = 5;
+    let hasLoadedExtraProducts = false;
     const loadMoreBtn = document.getElementById('load-more-btn');
     const tableBody = document.getElementById('products-table-body');
     const mobileList = document.getElementById('products-mobile-list');
 
     if (loadMoreBtn) {
       loadMoreBtn.addEventListener('click', function() {
+        if (hasLoadedExtraProducts) {
+          window.location.href = "{{ route('prices') }}";
+          return;
+        }
         loadMoreBtn.innerText = 'جاري التحميل...';
         loadMoreBtn.disabled = true;
 
@@ -363,11 +369,11 @@
                 tr.onclick = () => window.location = product.detail_url;
                 tr.style.cursor = 'pointer';
                 tr.innerHTML = `
-                  <td><div class="cell-card item-name"><i class="bi bi-box-seam me-1 text-success"></i> ${product.name}</div></td>
-                  <td><div class="cell-card price-tag">${product.display_price}</div></td>
-                  <td><div class="cell-card"><span class="badge bg-light text-dark"><i class="bi bi-tag-fill text-success me-1"></i> ${product.display_category || '-'}</span></div></td>
-                  <td><div class="cell-card"><i class="bi bi-shop me-1 text-muted"></i> ${product.display_store || '-'}</div></td>
-                  <td><div class="cell-card updated"><i class="bi bi-clock me-1"></i> ${product.formatted_updated_at}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='${product.detail_url}'"><div class="cell-card item-name"><i class="bi bi-box-seam me-1 text-success"></i> ${product.name}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='${product.prices_url}'"><div class="cell-card price-tag">${product.display_price}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='${product.category_url}'"><div class="cell-card"><span class="badge bg-light text-dark"><i class="bi bi-tag-fill text-success me-1"></i> ${product.display_category || '-'}</span></div></td>
+                  <td ${product.store_url ? `onclick="event.stopPropagation(); window.location='${product.store_url}'"` : ''}><div class="cell-card"><i class="bi bi-shop me-1 text-muted"></i> ${product.display_store || '-'}</div></td>
+                  <td onclick="event.stopPropagation(); window.location='${product.detail_url}'"><div class="cell-card updated"><i class="bi bi-clock me-1"></i> ${product.formatted_updated_at}</div></td>
                 `;
                 tableBody.appendChild(tr);
 
@@ -379,7 +385,7 @@
                     <i class="bi bi-box-seam text-success"></i>
                     <span>${product.name}</span>
                   </div>
-                  <div class="item-price-cell">
+                  <div class="item-price-cell" onclick="event.stopPropagation(); window.location='${product.prices_url}'">
                     <span class="price-val">${product.display_price}</span>
                   </div>
                 `;
@@ -387,8 +393,10 @@
               });
 
               offset += data.length;
+              hasLoadedExtraProducts = true;
               loadMoreBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i> المزيد....';
               loadMoreBtn.disabled = false;
+              loadMoreBtn.innerHTML = '<i class="bi bi-arrow-left-circle me-1"></i> عرض كل الأسعار';
             } else {
               loadMoreBtn.innerText = 'لا توجد منتجات إضافية';
               loadMoreBtn.disabled = true;

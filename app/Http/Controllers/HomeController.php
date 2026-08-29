@@ -53,10 +53,19 @@ class HomeController extends Controller
             ->get();
 
         $products->transform(function ($product) {
+            $bestStoreRecord = $product->prices
+                ->filter(fn ($price) => $price->store_id)
+                ->sortBy('price')
+                ->first();
             $product->display_price = $product->best_price ? $product->best_price . ' شيكل' : 'غير محدد';
             $product->display_category = $product->category_name;
             $product->display_store = $product->best_store;
             $product->detail_url = route('products.show', $product->id);
+            $product->prices_url = route('prices', ['search' => $product->name]);
+            $product->category_url = route('prices', ['category' => $product->category_name]);
+            $product->store_url = $bestStoreRecord
+                ? route('shop-details.show', $bestStoreRecord->store_id)
+                : null;
             return $product;
         });
 
